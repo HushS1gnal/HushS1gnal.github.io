@@ -25,6 +25,8 @@
 <meta name="twitter:card" content="summary_large_image">
   
   
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
   
   <title>Hush&#39;blog</title>
 
@@ -219,23 +221,23 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2022/05/24/hello-world/" target="_self">
-          <img src="/img/hello.jpg" srcset="/img/loading.gif" lazyload alt="Hello Hexo">
+        <a href="/2021/05/25/ciscn_2019_c_1/" target="_self">
+          <img src="/img/hello.jpg" srcset="/img/loading.gif" lazyload alt="ciscn_2019_c_1">
         </a>
       </div>
     
     <article class="col-12 col-md-8 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2022/05/24/hello-world/" target="_self">
-          Hello Hexo
+        <a href="/2021/05/25/ciscn_2019_c_1/" target="_self">
+          ciscn_2019_c_1
         </a>
       </h1>
 
-      <a class="index-excerpt" href="/2022/05/24/hello-world/" target="_self">
+      <a class="index-excerpt" href="/2021/05/25/ciscn_2019_c_1/" target="_self">
         <div>
           
-          首次使用Hexo。
+          分析 F5反汇编main函数后，会让我们选择函数。我们注意到  encrypt函数中存在着gets(s) 栈溢出漏洞。 但是并没有存在system函数，所以我们不能直接利用。 所以我们要用ret2libc技术，先考虑泄露libc基地址。 在mian和encrypt函数中都出现了puts函数 我们知道根据延迟绑定技术： plt表中的函数如果没有被调用过，那么got表中该函数的对应项则指向plt表的第
         </div>
       </a>
 
@@ -243,8 +245,8 @@
         
           <div class="post-meta mr-3">
             <i class="iconfont icon-date"></i>
-            <time datetime="2022-05-24 03:30" pubdate>
-              2022-05-24
+            <time datetime="2021-05-25 00:15" pubdate>
+              2021-05-25
             </time>
           </div>
         
@@ -259,12 +261,12 @@
     
       <span class="category-chain">
         
-  <a href="/categories/test/" class="category-chain-item">test</a>
+  <a href="/categories/Pwn/" class="category-chain-item">Pwn</a>
   
   
     <span>></span>
     
-  <a href="/categories/test/firsttest/" class="category-chain-item">firsttest</a>
+  <a href="/categories/Pwn/stack/" class="category-chain-item">stack</a>
   
   
 
@@ -281,7 +283,7 @@
           <div class="post-meta">
             <i class="iconfont icon-tags"></i>
             
-              <a href="/tags/test/">#test</a>
+              <a href="/tags/pwn/">#pwn</a>
             
           </div>
         

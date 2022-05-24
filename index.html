@@ -25,8 +25,6 @@
 <meta name="twitter:card" content="summary_large_image">
   
   
-    <meta name="referrer" content="no-referrer-when-downgrade">
-  
   
   <title>Hush&#39;blog</title>
 
@@ -114,18 +112,6 @@
           
           
             <li class="nav-item">
-              <a class="nav-link" href="/archives/">
-                <i class="iconfont icon-archive-fill"></i>
-                归档
-              </a>
-            </li>
-          
-        
-          
-          
-          
-          
-            <li class="nav-item">
               <a class="nav-link" href="/categories/">
                 <i class="iconfont icon-category-fill"></i>
                 分类
@@ -152,7 +138,7 @@
             <li class="nav-item">
               <a class="nav-link" href="/about/">
                 <i class="iconfont icon-user-fill"></i>
-                关于
+                联系我
               </a>
             </li>
           
@@ -216,6 +202,154 @@
               <div class="col-12 col-md-10 m-auto">
                 
 
+
+  <div class="row mx-auto index-card">
+    
+    
+      <div class="col-12 col-md-4 m-auto index-img">
+        <a href="/2021/07/29/roarctf_2019_easy_pwn/" target="_self">
+          <img src="/img/hello1.jpg" srcset="/img/loading.gif" lazyload alt="ZJCTF2019-EasyHeap">
+        </a>
+      </div>
+    
+    <article class="col-12 col-md-8 mx-auto index-info">
+      <h1 class="index-header">
+        
+        <a href="/2021/07/29/roarctf_2019_easy_pwn/" target="_self">
+          ZJCTF2019-EasyHeap
+        </a>
+      </h1>
+
+      <a class="index-excerpt" href="/2021/07/29/roarctf_2019_easy_pwn/" target="_self">
+        <div>
+          
+          白天睡觉，晚上来写道题。 分析这道题涉及了unsortedbins，malloc_hook，堆溢出。 heap的菜单选项常规题，做到目前为止，主要是两个思路： 先check，根据RELRO。如果为full，那么就需要malloc_hook。如果为partial，就直接更改got表就可以了。 在create函数中可以明显看出来这是个结构体  一个结构体有24个字节，前8个为标志位，中间8个size位
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2021-07-29 04:57" pubdate>
+              2021-07-29
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Pwn/" class="category-chain-item">Pwn</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/Pwn/heap/" class="category-chain-item">heap</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/pwn/">#pwn</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+      <div class="col-12 col-md-4 m-auto index-img">
+        <a href="/2021/07/27/ZJCTF2019-EasyHeap/" target="_self">
+          <img src="/img/hello.jpg" srcset="/img/loading.gif" lazyload alt="ZJCTF2019-EasyHeap">
+        </a>
+      </div>
+    
+    <article class="col-12 col-md-8 mx-auto index-info">
+      <h1 class="index-header">
+        
+        <a href="/2021/07/27/ZJCTF2019-EasyHeap/" target="_self">
+          ZJCTF2019-EasyHeap
+        </a>
+      </h1>
+
+      <a class="index-excerpt" href="/2021/07/27/ZJCTF2019-EasyHeap/" target="_self">
+        <div>
+          
+          做题先check找攻击手段，Partial RELRP -&gt; 修改got表  菜单题，直接找准delete看看有没有UAF。  UAF未果。  但是在Edit_heap中存在漏洞。 这里看起来是以为可以修改heap的size，其实这个size是用来对你的输入进行限制的。（栈溢出就在这里把size写的很大，方便我们写入）  而且这个程序写的会让你修改chunk的信息域 所以 wp 1234
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2021-07-27 01:25" pubdate>
+              2021-07-27
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Pwn/" class="category-chain-item">Pwn</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/Pwn/heap/" class="category-chain-item">heap</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/pwn/">#pwn</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
 
   <div class="row mx-auto index-card">
     

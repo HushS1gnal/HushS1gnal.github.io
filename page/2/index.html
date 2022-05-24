@@ -17,8 +17,8 @@
   <meta name="keywords" content="">
   
     <meta property="og:type" content="website">
-<meta property="og:title" content="归档">
-<meta property="og:url" content="https://hushs1gnal.github.io/archives/2022/index.html">
+<meta property="og:title" content="Hush&#39;blog">
+<meta property="og:url" content="https://hushs1gnal.github.io/page/2/index.html">
 <meta property="og:site_name" content="Hush&#39;blog">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:author" content="Hush">
@@ -26,7 +26,7 @@
   
   
   
-  <title>归档 - Hush&#39;blog</title>
+  <title>Hush&#39;blog</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -78,7 +78,7 @@
   <header>
     
 
-<div class="header-inner" style="height: 60vh;">
+<div class="header-inner" style="height: 100vh;">
   <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
   <div class="container">
     <a class="navbar-brand" href="/">
@@ -167,17 +167,21 @@
 <div id="banner" class="banner" parallax=true
      style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
   <div class="full-bg-img">
-    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.4)">
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="归档"></span>
+            <span id="subtitle" data-typed-text="Recode something "></span>
           
         </div>
 
         
       </div>
 
+      
+        <div class="scroll-down-bar">
+          <i class="iconfont icon-arrowdown"></i>
+        </div>
       
     </div>
   </div>
@@ -191,48 +195,169 @@
     
       <div class="container nopadding-x-md">
         <div id="board"
-          >
+          style="margin-top: 0">
           
           <div class="container">
             <div class="row">
               <div class="col-12 col-md-10 m-auto">
                 
 
-<div class="list-group">
-  <p class="h4">共计 12 篇文章</p>
-  <hr>
+
+  <div class="row mx-auto index-card">
+    
+    
+      <div class="col-12 col-md-4 m-auto index-img">
+        <a href="/2021/07/27/ZJCTF2019-EasyHeap/" target="_self">
+          <img src="/img/hello.jpg" srcset="/img/loading.gif" lazyload alt="ZJCTF2019-EasyHeap">
+        </a>
+      </div>
+    
+    <article class="col-12 col-md-8 mx-auto index-info">
+      <h1 class="index-header">
+        
+        <a href="/2021/07/27/ZJCTF2019-EasyHeap/" target="_self">
+          ZJCTF2019-EasyHeap
+        </a>
+      </h1>
+
+      <a class="index-excerpt" href="/2021/07/27/ZJCTF2019-EasyHeap/" target="_self">
+        <div>
+          
+          做题先check找攻击手段，Partial RELRP -&gt; 修改got表  菜单题，直接找准delete看看有没有UAF。  UAF未果。  但是在Edit_heap中存在漏洞。 这里看起来是以为可以修改heap的size，其实这个size是用来对你的输入进行限制的。（栈溢出就在这里把size写的很大，方便我们写入）  而且这个程序写的会让你修改chunk的信息域 所以 wp 1234
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2021-07-27 01:25" pubdate>
+              2021-07-27
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
   
   
     
-      
-      <p class="h5">2022</p>
+      <span class="category-chain">
+        
+  <a href="/categories/Pwn/" class="category-chain-item">Pwn</a>
+  
+  
+    <span>></span>
     
-    <a href="/2022/05/19/kernelROP-2018%E5%BC%BA%E7%BD%91%E6%9D%AF-core/" class="list-group-item list-group-item-action">
-      <time>05-19</time>
-      <div class="list-group-item-title">kernel_ROP-2018_强网杯-core</div>
-    </a>
+  <a href="/categories/Pwn/heap/" class="category-chain-item">heap</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Pwn/">#Pwn</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+      <div class="col-12 col-md-4 m-auto index-img">
+        <a href="/2021/05/25/ciscn_2019_c_1/" target="_self">
+          <img src="/img/hello.jpg" srcset="/img/loading.gif" lazyload alt="ciscn_2019_c_1">
+        </a>
+      </div>
+    
+    <article class="col-12 col-md-8 mx-auto index-info">
+      <h1 class="index-header">
+        
+        <a href="/2021/05/25/ciscn_2019_c_1/" target="_self">
+          ciscn_2019_c_1
+        </a>
+      </h1>
+
+      <a class="index-excerpt" href="/2021/05/25/ciscn_2019_c_1/" target="_self">
+        <div>
+          
+          分析 F5反汇编main函数后，会让我们选择函数。我们注意到  encrypt函数中存在着gets(s) 栈溢出漏洞。 但是并没有存在system函数，所以我们不能直接利用。 所以我们要用ret2libc技术，先考虑泄露libc基地址。 在mian和encrypt函数中都出现了puts函数 我们知道根据延迟绑定技术： plt表中的函数如果没有被调用过，那么got表中该函数的对应项则指向plt表的第
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2021-05-25 00:15" pubdate>
+              2021-05-25
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
   
     
-    <a href="/2022/05/17/Pwncollege_shellocode_1/" class="list-group-item list-group-item-action">
-      <time>05-17</time>
-      <div class="list-group-item-title">PwnCollege_shellcode第一章</div>
-    </a>
+      <span class="category-chain">
+        
+  <a href="/categories/Pwn/" class="category-chain-item">Pwn</a>
   
+  
+    <span>></span>
     
-    <a href="/2022/04/30/BDtpCrawler/" class="list-group-item list-group-item-action">
-      <time>04-30</time>
-      <div class="list-group-item-title">爬虫抓取百度图片</div>
-    </a>
+  <a href="/categories/Pwn/stack/" class="category-chain-item">stack</a>
   
+  
+
+  
+
+      </span>
     
-    <a href="/2022/03/13/cikucrawler/" class="list-group-item list-group-item-action">
-      <time>03-13</time>
-      <div class="list-group-item-title">爬虫抓取词语同义词</div>
-    </a>
   
-</div>
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Pwn/">#Pwn</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
 
 
+
+  <nav aria-label="navigation">
+    <span class="pagination" id="pagination">
+      <a class="extend prev" rel="prev" href="/"><i class="iconfont icon-arrowleft"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span>
+    </span>
+  </nav>
 
 
 

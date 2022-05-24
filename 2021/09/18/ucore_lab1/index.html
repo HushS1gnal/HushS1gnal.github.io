@@ -1,0 +1,709 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Hush">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="挖下一个大坑，不知道什么时候能够学完。 ucore的lab1并不难，每个练习的思路也很清晰。lab1学完，并看了他人的笔记巩固。写下自己的理解。 80386型CPU开机的流程：先执行在bios中的程序，但由于bios容量很小，不能完成所有的工作，也不具备更高的拓展性，所以他读取磁盘中第一个扇区(引导扇区)中的内容，将其加载至内存地址空间0x7c00处。之后将cs：ip指向0x7c00处，并执行引导">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ucore_lab1">
+<meta property="og:url" content="https://hushs1gnal.github.io/2021/09/18/ucore_lab1/index.html">
+<meta property="og:site_name" content="Hush&#39;blog">
+<meta property="og:description" content="挖下一个大坑，不知道什么时候能够学完。 ucore的lab1并不难，每个练习的思路也很清晰。lab1学完，并看了他人的笔记巩固。写下自己的理解。 80386型CPU开机的流程：先执行在bios中的程序，但由于bios容量很小，不能完成所有的工作，也不具备更高的拓展性，所以他读取磁盘中第一个扇区(引导扇区)中的内容，将其加载至内存地址空间0x7c00处。之后将cs：ip指向0x7c00处，并执行引导">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://hushs1gnal.github.io/img/hello4.jpg">
+<meta property="article:published_time" content="2021-09-17T18:25:12.000Z">
+<meta property="article:modified_time" content="2022-05-24T06:16:20.410Z">
+<meta property="article:author" content="Hush">
+<meta property="article:tag" content="OS">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://hushs1gnal.github.io/img/hello4.jpg">
+  
+  
+  
+  <title>ucore_lab1 - Hush&#39;blog</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"hushs1gnal.github.io","root":"/","version":"1.9.0","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Hush&#39;blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                联系我
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="ucore_lab1"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2021-09-18 02:25" pubdate>
+          2021年9月18日 凌晨
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          9.9k 字
+        
+      </span>
+    
+
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">ucore_lab1</h1>
+            
+            <div class="markdown-body">
+              
+              <p>挖下一个大坑，不知道什么时候能够学完。</p>
+<p>ucore的lab1并不难，每个练习的思路也很清晰。lab1学完，并看了他人的笔记巩固。写下自己的理解。</p>
+<p>80386型CPU开机的流程：先执行在bios中的程序，但由于bios容量很小，不能完成所有的工作，也不具备更高的拓展性，所以他读取磁盘中第一个扇区(引导扇区)中的内容，将其加载至内存地址空间0x7c00处。之后将cs：ip指向0x7c00处，并执行引导程序的第一条指令。</p>
+<h1 id="练习一-："><a href="#练习一-：" class="headerlink" title="练习一 ："></a>练习一 ：</h1><h2 id="操作系统镜像文件ucore-img是如何一步一步生成的？"><a href="#操作系统镜像文件ucore-img是如何一步一步生成的？" class="headerlink" title="操作系统镜像文件ucore.img是如何一步一步生成的？"></a><strong>操作系统镜像文件ucore.img是如何一步一步生成的？</strong></h2><p>   调用gcc把.c源码编译成了.o目标文件。然后通过ld 让这些目标文件转换为.out可执行文件</p>
+<figure class="highlight xl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs xl">B<span class="hljs-function"><span class="hljs-title">ootasm</span>.s bootmain.c-&gt;</span>B<span class="hljs-function"><span class="hljs-title">ootasm</span>.o bootmain.o -&gt;</span><span class="hljs-function"><span class="hljs-title">bootblock</span>.out -&gt;</span>(<span class="hljs-function"><span class="hljs-title">sign</span> 处理)bootblock           Kernel.ld init.o readline.o stdio.o kdebug.o -&gt;</span>kernel<br>B<span class="hljs-function"><span class="hljs-title">ootblock</span> + kernel -&gt;</span>ucore.img<br></code></pre></td></tr></table></figure>
+
+<h2 id="一个被系统认为是符合规范的硬盘主引导扇区的特征是什么？"><a href="#一个被系统认为是符合规范的硬盘主引导扇区的特征是什么？" class="headerlink" title="一个被系统认为是符合规范的硬盘主引导扇区的特征是什么？"></a><strong>一个被系统认为是符合规范的硬盘主引导扇区的特征是什么？</strong></h2><p>  在sign.c文件中： 一个主引导扇区必须是512字节，且第510字节是0x55 第511为0xAA</p>
+<p>当bios工作完成后，cpu的控制权移交给了ucore的引导程序bootloader，并由bootloader完成一些初始的操作：将cpu从实模式进入到保护模式，初始化GDT表</p>
+<h1 id="练习3"><a href="#练习3" class="headerlink" title="练习3:"></a>练习3:</h1><h2 id="为何开启A20，以及如何开启A20？"><a href="#为何开启A20，以及如何开启A20？" class="headerlink" title="为何开启A20，以及如何开启A20？"></a><strong>为何开启A20，以及如何开启A20？</strong></h2><blockquote>
+<p>在早期的8086CPU中，内存总线是20位的，由高16位的段基址和低16位的段内偏移共同构成一个20位的内存地址，而为了进入32位的保护模式，我们需要开启A20（第二十一位内存访问总线）</p>
+</blockquote>
+<h2 id="如何初始化GDT表？"><a href="#如何初始化GDT表？" class="headerlink" title="如何初始化GDT表？"></a><strong>如何初始化GDT表？</strong></h2><p> GDT表及其描述符已经在引导区中，载入即可。</p>
+<h2 id="如何进入保护模式？"><a href="#如何进入保护模式？" class="headerlink" title="如何进入保护模式？"></a><strong>如何进入保护模式？</strong></h2><p> Cr0寄存器PE位置1就开启了保护模式</p>
+<h3 id="bootasm-S"><a href="#bootasm-S" class="headerlink" title="bootasm.S"></a>bootasm.S</h3><figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><code class="hljs perl"><span class="hljs-comment"># Start the CPU: switch to 32-bit protected mode, jump into C.</span><br><span class="hljs-comment"># The BIOS loads this code from the first sector of the hard disk into</span><br><span class="hljs-comment"># memory at physical address 0x7c00 and starts executing in real mode</span><br><span class="hljs-comment"># with %cs=0 %ip=7c00.</span><br> <br>.set PROT_MODE_CSEG,        <span class="hljs-number">0x8</span>                     <span class="hljs-comment"># kernel code segment selector</span><br>.set PROT_MODE_DSEG,        <span class="hljs-number">0x10</span>                    <span class="hljs-comment"># kernel data segment selector</span><br>.set CR0_PE_ON,             <span class="hljs-number">0x1</span>                     <span class="hljs-comment"># protected mode enable flag</span><br> <br><span class="hljs-comment"># start address should be 0:7c00, in real mode, the beginning address of the running bootloader</span><br>.globl start<br>start:<br>.code16                              <span class="hljs-comment"># Assemble for 16-bit mode   清理环境，将一些寄存器置为0</span><br>    cli                                             <span class="hljs-comment"># Disable interrupts</span><br>    cld                                             <span class="hljs-comment"># String operations increment</span><br> <br>    <span class="hljs-comment"># Set up the important data segment registers (DS, ES, SS).</span><br>    xorw %ax, %ax                                   <span class="hljs-comment"># Segment number zero</span><br>    movw %ax, %ds                                   <span class="hljs-comment"># -&gt; Data Segment</span><br>    movw %ax, %es                                   <span class="hljs-comment"># -&gt; Extra Segment</span><br>    movw %ax, %ss                                   <span class="hljs-comment"># -&gt; Stack Segment</span><br> <br>    <span class="hljs-comment"># Enable A20:</span><br>    <span class="hljs-comment">#  For backwards compatibility with the earliest PCs, physical</span><br>    <span class="hljs-comment">#  address line 20 is tied low, so that addresses higher than</span><br>    <span class="hljs-comment">#  1MB wrap around to zero by default. This code undoes this</span><br></code></pre></td></tr></table></figure>
+
+<p>bootloader引导程序是位于设备的第一个扇区，即引导扇区的，而ucore的内核程序则是从第二个磁盘扇区开始往后存放的。bootmain.c的任务就是将kernel内核部分从磁盘中读出并载入内存，并将程序的控制流转移至指定的内核入口处。</p>
+<p>ucore的内核文件在生成磁盘映像时是以<strong>ELF</strong>格式保存的</p>
+<h2 id="分析bootloader加载ELF格式的OS的过程："><a href="#分析bootloader加载ELF格式的OS的过程：" class="headerlink" title="分析bootloader加载ELF格式的OS的过程："></a><strong>分析bootloader加载ELF格式的OS的过程：</strong></h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br></pre></td><td class="code"><pre><code class="hljs cpp">bootmain.c<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;defs.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;x86.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;elf.h&gt;</span></span><br> <br><span class="hljs-comment">/* *********************************************************************</span><br><span class="hljs-comment"> * This a dirt simple boot loader, whose sole job is to boot</span><br><span class="hljs-comment"> * an ELF kernel image from the first IDE hard disk.</span><br><span class="hljs-comment"> *</span><br><span class="hljs-comment"> * DISK LAYOUT</span><br><span class="hljs-comment"> *  * This program(bootasm.S and bootmain.c) is the bootloader.</span><br><span class="hljs-comment"> *    It should be stored in the first sector of the disk.</span><br><span class="hljs-comment"> *</span><br><span class="hljs-comment"> *  * The 2nd sector onward holds the kernel image.</span><br><span class="hljs-comment"> *</span><br><span class="hljs-comment"> *  * The kernel image must be in ELF format.</span><br><span class="hljs-comment"> *</span><br><span class="hljs-comment"> * BOOT UP STEPS</span><br><span class="hljs-comment"> *  * when the CPU boots it loads the BIOS into memory and executes it</span><br><span class="hljs-comment"> *</span><br><span class="hljs-comment"> *  * the BIOS intializes devices, sets of the interrupt routines, and</span><br><span class="hljs-comment"> *    reads the first sector of the boot device(e.g., hard-drive)</span><br><span class="hljs-comment"> *    into memory and jumps to it.</span><br><span class="hljs-comment"> *</span><br><span class="hljs-comment"> *  * Assuming this boot loader is stored in the first sector of the</span><br><span class="hljs-comment"> *    hard-drive, this code takes over...</span><br><span class="hljs-comment"> *</span><br><span class="hljs-comment"> *  * control starts in bootasm.S -- which sets up protected mode,</span><br><span class="hljs-comment"> *    and a stack so C code then run, then calls bootmain()</span><br><span class="hljs-comment"> *</span><br><span class="hljs-comment"> *  * bootmain() in this file takes over, reads in the kernel and jumps to it.</span><br><span class="hljs-comment"> * */</span><br><span class="hljs-type">unsigned</span> <span class="hljs-type">int</span>    SECTSIZE  =      <span class="hljs-number">512</span> ;<br><span class="hljs-keyword">struct</span> <span class="hljs-title class_">elfhdr</span> * ELFHDR    =      ((<span class="hljs-keyword">struct</span> elfhdr *)<span class="hljs-number">0x10000</span>) ;     <span class="hljs-comment">// scratch space</span><br> <br><span class="hljs-comment">/* waitdisk - wait for disk ready */</span><br><span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span></span><br><span class="hljs-function"><span class="hljs-title">waitdisk</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span> </span>&#123;<br>    <span class="hljs-keyword">while</span> ((<span class="hljs-built_in">inb</span>(<span class="hljs-number">0x1F7</span>) &amp; <span class="hljs-number">0xC0</span>) != <span class="hljs-number">0x40</span>)<br>        <span class="hljs-comment">/* do nothing */</span>;<br>&#125;<br> <br><span class="hljs-comment">/* readsect - read a single sector at @secno into @dst */</span><br><span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span></span><br><span class="hljs-function"><span class="hljs-title">readsect</span><span class="hljs-params">(<span class="hljs-type">void</span> *dst, <span class="hljs-type">uint32_t</span> secno)</span> </span>&#123;    readsect从设备的第secno扇区读取数据到dst位置<br>    <span class="hljs-comment">// wait for disk to be ready</span><br>    <span class="hljs-built_in">waitdisk</span>();<br> <br>    <span class="hljs-built_in">outb</span>(<span class="hljs-number">0x1F2</span>, <span class="hljs-number">1</span>);                         <span class="hljs-comment">// count = 1</span><br>    <span class="hljs-built_in">outb</span>(<span class="hljs-number">0x1F3</span>, secno &amp; <span class="hljs-number">0xFF</span>);<br>    <span class="hljs-built_in">outb</span>(<span class="hljs-number">0x1F4</span>, (secno &gt;&gt; <span class="hljs-number">8</span>) &amp; <span class="hljs-number">0xFF</span>);<br>    <span class="hljs-built_in">outb</span>(<span class="hljs-number">0x1F5</span>, (secno &gt;&gt; <span class="hljs-number">16</span>) &amp; <span class="hljs-number">0xFF</span>);<br>    <span class="hljs-built_in">outb</span>(<span class="hljs-number">0x1F6</span>, ((secno &gt;&gt; <span class="hljs-number">24</span>) &amp; <span class="hljs-number">0xF</span>) | <span class="hljs-number">0xE0</span>);<br>    <span class="hljs-built_in">outb</span>(<span class="hljs-number">0x1F7</span>, <span class="hljs-number">0x20</span>);                      <span class="hljs-comment">// cmd 0x20 - read sectors</span><br> <br>    <span class="hljs-comment">// wait for disk to be ready</span><br>    <span class="hljs-built_in">waitdisk</span>();<br> <br>    <span class="hljs-comment">// read a sector</span><br>    <span class="hljs-built_in">insl</span>(<span class="hljs-number">0x1F0</span>, dst, SECTSIZE / <span class="hljs-number">4</span>);<br>&#125;<br> <br><span class="hljs-comment">/* *</span><br><span class="hljs-comment"> * readseg - read @count bytes at @offset from kernel into virtual address @va,</span><br><span class="hljs-comment"> * might copy more than asked.</span><br><span class="hljs-comment"> * */</span><br><span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span></span><br><span class="hljs-function"><span class="hljs-title">readseg</span><span class="hljs-params">(<span class="hljs-type">uintptr_t</span> va, <span class="hljs-type">uint32_t</span> count, <span class="hljs-type">uint32_t</span> offset)</span> </span>&#123;   readseg简单包装了readsect，可以从设备读取任意长度的内容。<br>    <span class="hljs-type">uintptr_t</span> end_va = va + count;<br> <br>    <span class="hljs-comment">// round down to sector boundary</span><br>    va -= offset % SECTSIZE;<br> <br>    <span class="hljs-comment">// translate from bytes to sectors; kernel starts at sector 1</span><br>    <span class="hljs-type">uint32_t</span> secno = (offset / SECTSIZE) + <span class="hljs-number">1</span>;<br> <br>    <span class="hljs-comment">// If this is too slow, we could read lots of sectors at a time.</span><br>    <span class="hljs-comment">// We&#x27;d write more to memory than asked, but it doesn&#x27;t matter --</span><br>    <span class="hljs-comment">// we load in increasing order.</span><br>    <span class="hljs-keyword">for</span> (; va &lt; end_va; va += SECTSIZE, secno ++) &#123;<br>        <span class="hljs-built_in">readsect</span>((<span class="hljs-type">void</span> *)va, secno);<br>    &#125;<br>&#125;<br> <br><span class="hljs-comment">/* bootmain - the entry of bootloader */</span><br><span class="hljs-function"><span class="hljs-type">void</span></span><br><span class="hljs-function"><span class="hljs-title">bootmain</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span> </span>&#123;<br>    <span class="hljs-comment">// read the 1st page off disk  读取elf文件的头部</span><br>    <span class="hljs-built_in">readseg</span>((<span class="hljs-type">uintptr_t</span>)ELFHDR, SECTSIZE * <span class="hljs-number">8</span>, <span class="hljs-number">0</span>);<br> <br>    <span class="hljs-comment">// is this a valid ELF?   检查是否一个合格的ELF文件</span><br>    <span class="hljs-keyword">if</span> (ELFHDR-&gt;e_magic != ELF_MAGIC) &#123;<br>        <span class="hljs-keyword">goto</span> bad;<br>    &#125;<br> <br>    <span class="hljs-keyword">struct</span> <span class="hljs-title class_">proghdr</span> *ph, *eph;<br> <br>    <span class="hljs-comment">// load each program segment (ignores ph flags)</span><br>    ph = (<span class="hljs-keyword">struct</span> proghdr *)((<span class="hljs-type">uintptr_t</span>)ELFHDR + ELFHDR-&gt;e_phoff);<br>    eph = ph + ELFHDR-&gt;e_phnum;<br>    <span class="hljs-keyword">for</span> (; ph &lt; eph; ph ++) &#123;<br>        <span class="hljs-built_in">readseg</span>(ph-&gt;p_va &amp; <span class="hljs-number">0xFFFFFF</span>, ph-&gt;p_memsz, ph-&gt;p_offset);<br>    &#125;<br> <br>    <span class="hljs-comment">// call the entry point from the ELF header</span><br>    <span class="hljs-comment">// note: does not return</span><br>    ((<span class="hljs-built_in">void</span> (*)(<span class="hljs-type">void</span>))(ELFHDR-&gt;e_entry &amp; <span class="hljs-number">0xFFFFFF</span>))();<br> <br>bad:<br>    <span class="hljs-built_in">outw</span>(<span class="hljs-number">0x8A00</span>, <span class="hljs-number">0x8A00</span>);<br>    <span class="hljs-built_in">outw</span>(<span class="hljs-number">0x8A00</span>, <span class="hljs-number">0x8E00</span>);<br> <br>    <span class="hljs-comment">/* do nothing */</span><br>    <span class="hljs-keyword">while</span> (<span class="hljs-number">1</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>在引导程序bootloader将ucore的kernel加载至内存后，将cs:ip跳转至内核入口，接下来就开始进行内核的初始化操作，即&#x2F;kern&#x2F;init.c中的kern_init函数。</p>
+<p>kern_init函数是内核的总控函数，内核中的各个组成部分都在kern_init函数中完成初始化。</p>
+<p>（取经他人的补充）</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;defs.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdio.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;string.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;console.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;kdebug.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;picirq.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;trap.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;clock.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;intr.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;pmm.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;kmonitor.h&gt;</span></span><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">kern_init</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span> __<span class="hljs-title">attribute__</span><span class="hljs-params">((noreturn))</span></span>;<br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">grade_backtrace</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">lab1_switch_test</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span></span>;<br> <br><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * 内核入口 总控函数</span><br><span class="hljs-comment"> * */</span><br><span class="hljs-function"><span class="hljs-type">void</span></span><br><span class="hljs-function"><span class="hljs-title">kern_init</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span></span>&#123;<br>    <span class="hljs-keyword">extern</span> <span class="hljs-type">char</span> edata[], end[];<br>    <span class="hljs-built_in">memset</span>(edata, <span class="hljs-number">0</span>, end - edata);<br> <br>    <span class="hljs-comment">// 初始化控制台(控制显卡交互)，只有设置好了对显卡的控制后，std_out输出的信息（例如cprintf）才能显示在控制台中</span><br>    <span class="hljs-built_in">cons_init</span>();                <span class="hljs-comment">// init the console</span><br> <br>    <span class="hljs-type">const</span> <span class="hljs-type">char</span> *message = <span class="hljs-string">&quot;(THU.CST) os is loading ...&quot;</span>;<br>    <span class="hljs-built_in">cprintf</span>(<span class="hljs-string">&quot;%s\n\n&quot;</span>, message);<br> <br>    <span class="hljs-built_in">print_kerninfo</span>();<br> <br>    <span class="hljs-built_in">grade_backtrace</span>();<br> <br>    <span class="hljs-comment">// 初始化物理内存管理器</span><br>    <span class="hljs-built_in">pmm_init</span>();                 <span class="hljs-comment">// init physical memory management</span><br> <br>    <span class="hljs-comment">// 初始化中断控制器</span><br>    <span class="hljs-built_in">pic_init</span>();                 <span class="hljs-comment">// init interrupt controller</span><br>    <span class="hljs-comment">// 初始化中断描述符表</span><br>    <span class="hljs-built_in">idt_init</span>();                 <span class="hljs-comment">// init interrupt descriptor table</span><br> <br>    <span class="hljs-comment">// 初始化定时芯片</span><br>    <span class="hljs-built_in">clock_init</span>();               <span class="hljs-comment">// init clock interrupt</span><br>    <span class="hljs-comment">// 开中断</span><br>    <span class="hljs-built_in">intr_enable</span>();              <span class="hljs-comment">// enable irq interrupt</span><br> <br>    <span class="hljs-comment">//LAB1: CAHLLENGE 1 If you try to do it, uncomment lab1_switch_test()</span><br>    <span class="hljs-comment">// user/kernel mode switch test</span><br>    <span class="hljs-built_in">lab1_switch_test</span>();<br> <br>    <span class="hljs-comment">/* do nothing */</span><br>    <span class="hljs-comment">// 陷入死循环，避免内核程序退出。通过监听中断事件进行服务</span><br>    <span class="hljs-keyword">while</span> (<span class="hljs-number">1</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p> 从kern_init函数的代码中可以看出，其依次完成了如下的几个主要工作：</p>
+<ol>
+<li><strong>cons_init</strong> 初始化控制台(控制显卡交互)</li>
+<li><strong>pmm_init</strong> 初始化物理内存管理器(lab1中里面暂时只是完成了GDT的重新设置，比较简单。而在lab2的物理内存管理的实现中，<strong>pmm_init</strong>才成为主角)</li>
+<li><strong>pic_init</strong>初始化中断控制器(内部通过与8259A中断控制器芯片进行交互，令ucore能够接收到来自硬件的各种中断请求)</li>
+<li><strong>idt_init</strong>初始化中断描述符表(在下面的中断机制一节中详细介绍)</li>
+<li><strong>clock_init</strong> 初始化定时器(进行8253定时器的相关设置，将其设置为10ms发起一次时钟中断)</li>
+<li><strong>intr_enable</strong> 完成了内核结构的初始化后，开启中断，至此ucore内核正式开始运行</li>
+</ol>
+<p>在练习5与练习6中，主要了解的就是ucore的中断机制。用户态写下的程序需要调用系统函数，就需要用到中断，来暂时的从用户态变为内核态，调用完函数后重新返回至用户态</p>
+<h1 id="练习5：-补充kdebug-c中函数print-stackframe"><a href="#练习5：-补充kdebug-c中函数print-stackframe" class="headerlink" title="练习5： 补充kdebug.c中函数print_stackframe"></a><strong>练习5： 补充kdebug.c中函数print_stackframe</strong></h1><figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs mipsasm">void<br>print_stackframe(void) &#123;<br>     <span class="hljs-comment">/* LAB1 YOUR CODE : STEP 1 */</span><br>     <span class="hljs-comment">/* (1) call read_ebp() to get the value of ebp. the type is (uint32_t);</span><br><span class="hljs-comment">      * (2) call read_eip() to get the value of eip. the type is (uint32_t);</span><br><span class="hljs-comment">      * (3) from 0 .. STACKFRAME_DEPTH</span><br><span class="hljs-comment">      *    (3.1) printf value of ebp, eip</span><br><span class="hljs-comment">      *    (3.2) (uint32_t)calling arguments [0..4] = the contents in address (unit32_t)ebp +2 [0..4]</span><br><span class="hljs-comment">      *    (3.3) cprintf(&quot;\n&quot;);</span><br><span class="hljs-comment">      *    (3.4) call print_debuginfo(eip-1) to print the C calling function name and line number, etc.</span><br><span class="hljs-comment">      *    (3.5) popup a calling stackframe</span><br><span class="hljs-comment">      *           NOTICE: the calling funciton&#x27;s return addr eip  = ss:[ebp+4]</span><br><span class="hljs-comment">      *                   the calling funciton&#x27;s ebp = ss:[ebp]</span><br><span class="hljs-comment">      */</span><br>    uint32_t ebp = read_ebp(), <span class="hljs-keyword">eip </span>= read_eip()<span class="hljs-comment">;#读取ebp，eip的值，具体函数在这个程序中已经为我们封装好了</span><br> <br>    int i, <span class="hljs-keyword">j;</span><br><span class="hljs-keyword"></span>    for (i = <span class="hljs-number">0</span><span class="hljs-comment">; ebp != 0 &amp;&amp; i &lt; STACKFRAME_DEPTH; i ++) &#123; #开始循环，程序中已经为我们算出了栈帧的深度</span><br>        cprintf(<span class="hljs-string">&quot;ebp:0x%08x eip:0x%08x args:&quot;</span>, ebp, <span class="hljs-keyword">eip);#打印出当前ebp，和eip的值</span><br><span class="hljs-keyword"></span>        uint32_t *args = (uint32_t *)ebp + <span class="hljs-number">2</span><span class="hljs-comment">;            #args代表的是栈帧中ebp下方的参数 被保存的一些原函数的值</span><br>        for (<span class="hljs-keyword">j </span>= <span class="hljs-number">0</span><span class="hljs-comment">; j &lt; 4; j ++) &#123;</span><br>            cprintf(<span class="hljs-string">&quot;0x%08x &quot;</span>, args[<span class="hljs-keyword">j]); </span>                 <span class="hljs-comment">#打印ebp之后的四个参数</span><br>        &#125;<br>        cprintf(<span class="hljs-string">&quot;\n&quot;</span>);<br>        print_debuginfo(<span class="hljs-keyword">eip </span>- <span class="hljs-number">1</span>);          <br>        <span class="hljs-keyword">eip </span>= ((uint32_t *)ebp)[<span class="hljs-number">1</span>]<span class="hljs-comment">;              #ebp[1] ebp的下一位，指向的是返回地址，即eip的迭代</span><br>        ebp = ((uint32_t *)ebp)[<span class="hljs-number">0</span>]<span class="hljs-comment">;             # ebp[0] 即ebp的所指向的旧的ebp的值</span><br>    &#125;<br>&#125; <br></code></pre></td></tr></table></figure>
+
+<h3 id="ucore中断功能的组成部分（取经）"><a href="#ucore中断功能的组成部分（取经）" class="headerlink" title="ucore中断功能的组成部分（取经）"></a>ucore中断功能的组成部分（取经）</h3><p>　　<strong>ucore的中断工作机制大致可以分为以下几个部分：</strong></p>
+<p>　　1. IDT中断描述符表的建立</p>
+<p>　　2. 中断栈帧的生成</p>
+<p>　　3. 接收到中断栈帧，通过对应的中断服务例程进行处理</p>
+<p>　　4. 中断服务例程处理完毕，中断返回</p>
+<h1 id="练习6：完善中断初始化和处理："><a href="#练习6：完善中断初始化和处理：" class="headerlink" title="练习6：完善中断初始化和处理："></a><strong>练习6：完善中断初始化和处理：</strong></h1><figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><code class="hljs reasonml"><span class="hljs-comment">/* *</span><br><span class="hljs-comment"> * Interrupt descriptor table:</span><br><span class="hljs-comment"> *</span><br><span class="hljs-comment"> * Must be built at run time because shifted function addresses can&#x27;t</span><br><span class="hljs-comment"> * be represented in relocation records.</span><br><span class="hljs-comment"> * */</span><br>static <span class="hljs-keyword">struct</span> gatedesc idt<span class="hljs-literal">[<span class="hljs-number">256</span>]</span> = &#123;&#123;<span class="hljs-number">0</span>&#125;&#125;;<br> <br>static <span class="hljs-keyword">struct</span> pseudodesc idt_pd = &#123;<br>    sizeof(idt) - <span class="hljs-number">1</span>, (uintptr_t)idt<br>&#125;;<br> <br><span class="hljs-comment">/* idt_init - initialize IDT to each of the entry points in kern/trap/vectors.S */</span><br>void<br>idt<span class="hljs-constructor">_init(<span class="hljs-params">void</span>)</span> &#123;<br>     <span class="hljs-comment">/* LAB1 YOUR CODE : STEP 2 */</span><br>     <span class="hljs-comment">/* (1) Where are the entry addrs of each Interrupt Service Routine (ISR)?</span><br><span class="hljs-comment">      *     All ISR&#x27;s entry addrs are stored in __vectors. where is uintptr_t __vectors[] ?</span><br><span class="hljs-comment">      *     __vectors[] is in kern/trap/vector.S which is produced by tools/vector.c</span><br><span class="hljs-comment">      *     (try &quot;make&quot; command in lab1, then you will find vector.S in kern/trap DIR)</span><br><span class="hljs-comment">      *     You can use  &quot;extern uintptr_t __vectors[];&quot; to define this extern variable which will be used later.</span><br><span class="hljs-comment">      * (2) Now you should setup the entries of ISR in Interrupt Description Table (IDT).</span><br><span class="hljs-comment">      *     Can you see idt[256] in this file? Yes, it&#x27;s IDT! you can use SETGATE macro to setup each item of IDT</span><br><span class="hljs-comment">      * (3) After setup the contents of IDT, you will let CPU know where is the IDT by using &#x27;lidt&#x27; instruction.</span><br><span class="hljs-comment">      *     You don&#x27;t know the meaning of this instruction? just google it! and check the libs/x86.h to know more.</span><br><span class="hljs-comment">      *     Notice: the argument of lidt is idt_pd. try to find it!</span><br><span class="hljs-comment">      */</span><br>    extern uintptr_t __vectors<span class="hljs-literal">[]</span>;<br>    <span class="hljs-built_in">int</span> i;<br>    <span class="hljs-comment">// 首先通过tools/vector.c通过程序生成/kern/trap/verctor.S,并在加载内核时对之前已经声明的全局变量__vectors进行整体的赋值</span><br>    <span class="hljs-comment">// __vectors数组中的每一项对应于中断描述符的中断服务例程的入口地址，在SETGATE宏的使用中可以体现出来</span><br>    <span class="hljs-comment">// 将__vectors数组中每一项关于中断描述符的描述设置到下标相同的idt中，通过宏SETGATE构造出最终的中断描述符结构</span><br>    <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; sizeof(idt)<span class="hljs-operator"> / </span>sizeof(<span class="hljs-keyword">struct</span> gatedesc); i ++) &#123;<br>        <span class="hljs-comment">// 遍历idt数组，将其中的内容(中断描述符)设置进IDT中断描述符表中(默认的DPL特权级都是内核态DPL_KERNEL=0)</span><br>        <span class="hljs-constructor">SETGATE(<span class="hljs-params">idt</span>[<span class="hljs-params">i</span>], 0, GD_KTEXT, <span class="hljs-params">__vectors</span>[<span class="hljs-params">i</span>], DPL_KERNEL)</span>;<br>    &#125;<br>    <span class="hljs-comment">// set for switch from user to kernel</span><br>    <span class="hljs-comment">// 用户态与内核态的互相转化是通过中断实现的，单独为其一个中断描述符</span><br>    <span class="hljs-comment">// 由于需要允许用户态的程序访问使用该中断，DPL特权级为用户态DPL_USER=3</span><br>    <span class="hljs-constructor">SETGATE(<span class="hljs-params">idt</span>[T_SWITCH_TOK], 0, GD_KTEXT, <span class="hljs-params">__vectors</span>[T_SWITCH_TOK], DPL_USER)</span>;<br>    <span class="hljs-comment">// load the IDT 令IDTR中断描述符表寄存器指向idt_pd，加载IDT</span><br>    <span class="hljs-comment">// idt_pd结构体中的前16位为描述符表的界限，pd_base指向之前完成了赋值操作的idt数组的起始位置</span><br>    lidt(&amp;idt_pd);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="中断描述符表（也可简称为保护模式下的中断向量表）中一个表项占多少字节？其中哪几位代表中断处理代码的入口？："><a href="#中断描述符表（也可简称为保护模式下的中断向量表）中一个表项占多少字节？其中哪几位代表中断处理代码的入口？：" class="headerlink" title="中断描述符表（也可简称为保护模式下的中断向量表）中一个表项占多少字节？其中哪几位代表中断处理代码的入口？："></a><strong>中断描述符表（也可简称为保护模式下的中断向量表）中一个表项占多少字节？其中哪几位代表中断处理代码的入口？：</strong></h2><p> 中断向量表一个表项占用8字节，其中2-3字节是段选择子，0-1字节和6-7字节拼成位移，两者联合便是中断处理程序的入口地址。</p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/xiaoxiongcanguan/p/13714587.html">部分内容借鉴</a></p>
+<p>初次学习，在这个博客中也学到了不少的内容，补充了一些课上并没有的东西。</p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/OS/" class="category-chain-item">OS</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/OS/ucore/" class="category-chain-item">ucore</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/OS/">#OS</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>ucore_lab1</div>
+      <div>https://hushs1gnal.github.io/2021/09/18/ucore_lab1/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Hush</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2021年9月18日</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>许可协议</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2021/10/01/pwnable_orw/" title="Pwnable_orw(需要写入shellcode)">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Pwnable_orw(需要写入shellcode)</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2021/07/29/roarctf_2019_easy_pwn/" title="roarctf_2019_easy_pwn">
+                        <span class="hidden-mobile">roarctf_2019_easy_pwn</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

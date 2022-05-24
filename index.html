@@ -651,6 +651,228 @@
     
     
       <div class="col-12 col-md-4 m-auto index-img">
+        <a href="/2021/10/15/how2heap_2.27/" target="_self">
+          <img src="/img/hello3.jpg" srcset="/img/loading.gif" lazyload alt="how2heap部分(libc2.27)">
+        </a>
+      </div>
+    
+    <article class="col-12 col-md-8 mx-auto index-info">
+      <h1 class="index-header">
+        
+        <a href="/2021/10/15/how2heap_2.27/" target="_self">
+          how2heap部分(libc2.27)
+        </a>
+      </h1>
+
+      <a class="index-excerpt" href="/2021/10/15/how2heap_2.27/" target="_self">
+        <div>
+          
+          1.fastbin_dup.c1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950#include &lt;stdio.h&gt;#include &lt;stdlib.h&gt;#include &lt;assert.h&gt; int main()&amp;#123;
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2021-10-15 12:39" pubdate>
+              2021-10-15
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Pwn/" class="category-chain-item">Pwn</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/Pwn/heap/" class="category-chain-item">heap</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Pwn/">#Pwn</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+      <div class="col-12 col-md-4 m-auto index-img">
+        <a href="/2021/10/01/pwnable_orw/" target="_self">
+          <img src="/img/hello4.jpg" srcset="/img/loading.gif" lazyload alt="Pwnable_orw(需要写入shellcode)">
+        </a>
+      </div>
+    
+    <article class="col-12 col-md-8 mx-auto index-info">
+      <h1 class="index-header">
+        
+        <a href="/2021/10/01/pwnable_orw/" target="_self">
+          Pwnable_orw(需要写入shellcode)
+        </a>
+      </h1>
+
+      <a class="index-excerpt" href="/2021/10/01/pwnable_orw/" target="_self">
+        <div>
+          
+          需要自己写入一段shellcode。 但这道题的特殊之处就在于，这道题调用**orw_seccomp**函数后，会禁止一些系统调用，只会保留一些安全的系统调用。   seccomp相当于内核中的一种安全机制，正常情况下，程序可以使用所有的 syscall，但是当劫持程序流程之后通过 exeve 来呼叫 syscall 得到 shell 时 seccomp 边排上了用场，他可以过滤掉某些 sysc
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2021-10-01 20:21" pubdate>
+              2021-10-01
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Pwn/" class="category-chain-item">Pwn</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/Pwn/base/" class="category-chain-item">base</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Pwn/">#Pwn</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+      <div class="col-12 col-md-4 m-auto index-img">
+        <a href="/2021/09/18/ucore_lab1/" target="_self">
+          <img src="/img/hello4.jpg" srcset="/img/loading.gif" lazyload alt="ucore_lab1">
+        </a>
+      </div>
+    
+    <article class="col-12 col-md-8 mx-auto index-info">
+      <h1 class="index-header">
+        
+        <a href="/2021/09/18/ucore_lab1/" target="_self">
+          ucore_lab1
+        </a>
+      </h1>
+
+      <a class="index-excerpt" href="/2021/09/18/ucore_lab1/" target="_self">
+        <div>
+          
+          挖下一个大坑，不知道什么时候能够学完。 ucore的lab1并不难，每个练习的思路也很清晰。lab1学完，并看了他人的笔记巩固。写下自己的理解。 80386型CPU开机的流程：先执行在bios中的程序，但由于bios容量很小，不能完成所有的工作，也不具备更高的拓展性，所以他读取磁盘中第一个扇区(引导扇区)中的内容，将其加载至内存地址空间0x7c00处。之后将cs：ip指向0x7c00处，并执行引导
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2021-09-18 02:25" pubdate>
+              2021-09-18
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/OS/" class="category-chain-item">OS</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/OS/ucore/" class="category-chain-item">ucore</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/OS/">#OS</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+      <div class="col-12 col-md-4 m-auto index-img">
         <a href="/2021/07/29/roarctf_2019_easy_pwn/" target="_self">
           <img src="/img/hello1.jpg" srcset="/img/loading.gif" lazyload alt="roarctf_2019_easy_pwn">
         </a>
@@ -721,155 +943,13 @@
     </article>
   </div>
 
-  <div class="row mx-auto index-card">
-    
-    
-      <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2021/07/27/ZJCTF2019-EasyHeap/" target="_self">
-          <img src="/img/hello.jpg" srcset="/img/loading.gif" lazyload alt="ZJCTF2019-EasyHeap">
-        </a>
-      </div>
-    
-    <article class="col-12 col-md-8 mx-auto index-info">
-      <h1 class="index-header">
-        
-        <a href="/2021/07/27/ZJCTF2019-EasyHeap/" target="_self">
-          ZJCTF2019-EasyHeap
-        </a>
-      </h1>
-
-      <a class="index-excerpt" href="/2021/07/27/ZJCTF2019-EasyHeap/" target="_self">
-        <div>
-          
-          做题先check找攻击手段，Partial RELRP -&gt; 修改got表  菜单题，直接找准delete看看有没有UAF。  UAF未果。  但是在Edit_heap中存在漏洞。 这里看起来是以为可以修改heap的size，其实这个size是用来对你的输入进行限制的。（栈溢出就在这里把size写的很大，方便我们写入）  而且这个程序写的会让你修改chunk的信息域 所以 wp 1234
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2021-07-27 01:25" pubdate>
-              2021-07-27
-            </time>
-          </div>
-        
-        
-          <div class="post-meta mr-3 d-flex align-items-center">
-            <i class="iconfont icon-category"></i>
-            
-
-<span class="category-chains">
-  
-  
-    
-      <span class="category-chain">
-        
-  <a href="/categories/Pwn/" class="category-chain-item">Pwn</a>
-  
-  
-    <span>></span>
-    
-  <a href="/categories/Pwn/heap/" class="category-chain-item">heap</a>
-  
-  
-
-  
-
-      </span>
-    
-  
-</span>
-
-          </div>
-        
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
-            
-              <a href="/tags/Pwn/">#Pwn</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
-
-  <div class="row mx-auto index-card">
-    
-    
-      <div class="col-12 col-md-4 m-auto index-img">
-        <a href="/2021/05/25/ciscn_2019_c_1/" target="_self">
-          <img src="/img/hello.jpg" srcset="/img/loading.gif" lazyload alt="ciscn_2019_c_1">
-        </a>
-      </div>
-    
-    <article class="col-12 col-md-8 mx-auto index-info">
-      <h1 class="index-header">
-        
-        <a href="/2021/05/25/ciscn_2019_c_1/" target="_self">
-          ciscn_2019_c_1
-        </a>
-      </h1>
-
-      <a class="index-excerpt" href="/2021/05/25/ciscn_2019_c_1/" target="_self">
-        <div>
-          
-          分析 F5反汇编main函数后，会让我们选择函数。我们注意到  encrypt函数中存在着gets(s) 栈溢出漏洞。 但是并没有存在system函数，所以我们不能直接利用。 所以我们要用ret2libc技术，先考虑泄露libc基地址。 在mian和encrypt函数中都出现了puts函数 我们知道根据延迟绑定技术： plt表中的函数如果没有被调用过，那么got表中该函数的对应项则指向plt表的第
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2021-05-25 00:15" pubdate>
-              2021-05-25
-            </time>
-          </div>
-        
-        
-          <div class="post-meta mr-3 d-flex align-items-center">
-            <i class="iconfont icon-category"></i>
-            
-
-<span class="category-chains">
-  
-  
-    
-      <span class="category-chain">
-        
-  <a href="/categories/Pwn/" class="category-chain-item">Pwn</a>
-  
-  
-    <span>></span>
-    
-  <a href="/categories/Pwn/stack/" class="category-chain-item">stack</a>
-  
-  
-
-  
-
-      </span>
-    
-  
-</span>
-
-          </div>
-        
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
-            
-              <a href="/tags/Pwn/">#Pwn</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
 
 
+  <nav aria-label="navigation">
+    <span class="pagination" id="pagination">
+      <span class="page-number current">1</span><a class="page-number" href="/page/2/#board">2</a><a class="extend next" rel="next" href="/page/2/#board"><i class="iconfont icon-arrowright"></i></a>
+    </span>
+  </nav>
 
 
 

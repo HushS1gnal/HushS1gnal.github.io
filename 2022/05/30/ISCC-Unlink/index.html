@@ -16,24 +16,24 @@
   <meta name="author" content="Hush">
   <meta name="keywords" content="">
   
-    <meta name="description" content="为什么使用Docker+WSL2docker可以让我们的环境配置更加简单。 WSL2则提供更快速的Linux服务。 你也不想启动一个虚拟机等半天，让虚拟机关机也等半天吧？ 其次就是，WSL没有图形化的界面。可以更好让锻炼用户，让用户记下一些常用命令。 而且只用命令行来操作计算机可以让你看起来更像一个黑客（程序员） 配置Docker+WSL2网上教程很多，在这里不多阐述。 重点是最好使用Docker">
+    <meta name="description" content="分析 很普通的菜单题目。 但给了个sh后门函数  查出是libc-2.23(然而并不是，只是由Ubuntu16编译而已) 实际上是libc-2.27，后续关于如何判断libc版本我会再记个笔记。 仔细看程序，虽然没有UAF漏洞，但有堆溢出漏洞，可以修改了 思路让一个大块(unsorted bin)和一个小块（tcache，且已被释放）合并（修改tcache下一块的chunk头部的prevsize）">
 <meta property="og:type" content="article">
-<meta property="og:title" content="首次实战WSL+Docker">
-<meta property="og:url" content="https://hushs1gnal.github.io/2022/05/24/wsltest/index.html">
+<meta property="og:title" content="ISCC2022-Unlink">
+<meta property="og:url" content="https://hushs1gnal.github.io/2022/05/30/ISCC-Unlink/index.html">
 <meta property="og:site_name" content="Hush&#39;blog">
-<meta property="og:description" content="为什么使用Docker+WSL2docker可以让我们的环境配置更加简单。 WSL2则提供更快速的Linux服务。 你也不想启动一个虚拟机等半天，让虚拟机关机也等半天吧？ 其次就是，WSL没有图形化的界面。可以更好让锻炼用户，让用户记下一些常用命令。 而且只用命令行来操作计算机可以让你看起来更像一个黑客（程序员） 配置Docker+WSL2网上教程很多，在这里不多阐述。 重点是最好使用Docker">
+<meta property="og:description" content="分析 很普通的菜单题目。 但给了个sh后门函数  查出是libc-2.23(然而并不是，只是由Ubuntu16编译而已) 实际上是libc-2.27，后续关于如何判断libc版本我会再记个笔记。 仔细看程序，虽然没有UAF漏洞，但有堆溢出漏洞，可以修改了 思路让一个大块(unsorted bin)和一个小块（tcache，且已被释放）合并（修改tcache下一块的chunk头部的prevsize）">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://hushs1gnal.github.io/img/hello.jpg">
-<meta property="article:published_time" content="2022-05-24T10:27:29.475Z">
-<meta property="article:modified_time" content="2022-05-24T11:03:46.476Z">
+<meta property="og:image" content="https://hushs1gnal.github.io/img/hello3.jpg">
+<meta property="article:published_time" content="2022-05-30T10:27:10.157Z">
+<meta property="article:modified_time" content="2022-05-30T14:54:17.607Z">
 <meta property="article:author" content="Hush">
 <meta property="article:tag" content="Pwn">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://hushs1gnal.github.io/img/hello.jpg">
+<meta name="twitter:image" content="https://hushs1gnal.github.io/img/hello3.jpg">
   
   
   
-  <title>首次实战WSL+Docker - Hush&#39;blog</title>
+  <title>ISCC2022-Unlink - Hush&#39;blog</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -184,7 +184,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="首次实战WSL+Docker"></span>
+            <span id="subtitle" data-typed-text="ISCC2022-Unlink"></span>
           
         </div>
 
@@ -195,8 +195,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2022-05-24 18:27" pubdate>
-          2022年5月24日 晚上
+        <time datetime="2022-05-30 18:27" pubdate>
+          2022年5月30日 晚上
         </time>
       </span>
     
@@ -207,7 +207,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          2k 字
+          1.8k 字
         
       </span>
     
@@ -247,98 +247,39 @@
         <div id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">首次实战WSL+Docker</h1>
+            <h1 style="display: none">ISCC2022-Unlink</h1>
             
             <div class="markdown-body">
               
-              <h1 id="为什么使用Docker-WSL2"><a href="#为什么使用Docker-WSL2" class="headerlink" title="为什么使用Docker+WSL2"></a>为什么使用Docker+WSL2</h1><p>docker可以让我们的环境配置更加简单。</p>
-<p>WSL2则提供更快速的Linux服务。</p>
-<p>你也不想启动一个虚拟机等半天，让虚拟机关机也等半天吧？</p>
-<p>其次就是，WSL没有图形化的界面。可以更好让锻炼用户，让用户记下一些常用命令。</p>
-<p>而且只用命令行来操作计算机可以让你看起来更像一个黑客（程序员）</p>
-<h1 id="配置Docker-WSL2"><a href="#配置Docker-WSL2" class="headerlink" title="配置Docker+WSL2"></a>配置Docker+WSL2</h1><p>网上教程很多，在这里不多阐述。</p>
-<p>重点是最好使用Docker4.4.4。</p>
-<p>其他版本总是出现Docker stopped 等错误。</p>
-<h1 id="下载PWN镜像"><a href="#下载PWN镜像" class="headerlink" title="下载PWN镜像"></a>下载PWN镜像</h1><p><a target="_blank" rel="noopener" href="https://nocbtm.github.io/2020/02/24/skysider-pwndocker-%E6%AD%A3%E7%A1%AE%E4%BD%BF%E7%94%A8%E5%A7%BF%E5%8A%BF/#%E5%89%8D%E8%A8%80">参考博客</a></p>
-<p>以下操作可在WSL中完成</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">docker pull skysider/pwndocker<br></code></pre></td></tr></table></figure>
+              <h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p><img src="/%5Cimg%5Ciscc_unlink-1.png" srcset="/img/loading.gif" lazyload alt="iscc_unlink-1"></p>
+<p>很普通的菜单题目。</p>
+<p>但给了个sh后门函数</p>
+<p><img src="/%5Cimg%5Ciscc_unlink-2.png" srcset="/img/loading.gif" lazyload alt="iscc_unlink-2"></p>
+<p>查出是libc-2.23(然而并不是，只是由Ubuntu16编译而已)</p>
+<p>实际上是libc-2.27，后续关于如何判断libc版本我会再记个笔记。</p>
+<p>仔细看程序，虽然没有UAF漏洞，但有堆溢出漏洞，可以修改了</p>
+<h2 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h2><p>让一个大块(unsorted bin)和一个小块（tcache，且已被释放）合并（修改tcache下一块的chunk头部的prevsize）</p>
+<h2 id="合并"><a href="#合并" class="headerlink" title="合并"></a>合并</h2><p>合并分为两种</p>
+<p>1.向高地址的chunk合并</p>
+<p>2.向低地址的chunk合并</p>
+<h3 id="高地址合并"><a href="#高地址合并" class="headerlink" title="高地址合并"></a>高地址合并</h3><p>在gdb中，所谓高地址，就是在下面的chunk，因为我们知道堆的生长方向是向上，也就是内存地址增加的方向，栈则相反。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs c"> <span class="hljs-keyword">if</span> (nextchunk != av-&gt;top) &#123;<span class="hljs-comment">//nextchunk根据目前堆块的size来计算的，如果下一个堆块不是topchunk</span><br>      nextinuse = inuse_bit_at_offset(nextchunk, nextsize);<span class="hljs-comment">//检查一下nextchunk的nextchunk的inuse位，其实就是判断nextchunk是否被释放了</span><br>      <span class="hljs-keyword">if</span> (!nextinuse) &#123;<span class="hljs-comment">//如果是0，也就是nextchunk也被释放了，那就进行合并</span><br>        unlink(av, nextchunk, bck, fwd);<span class="hljs-comment">//unlink将nextchunk下链</span><br>        size += nextsize;<span class="hljs-comment">//合并完成</span><br>      &#125;<br>.......<br><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> inuse_bit_at_offset(p, s)\</span><br><span class="hljs-meta">  (((mchunkptr) (((char *) (p)) + (s)))-&gt;mchunk_size &amp; PREV_INUSE)</span><br></code></pre></td></tr></table></figure>
 
-<p>下载最新版（最新版只含python3）</p>
-<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">docker</span> pull registry.cn-hangzhou.aliyuncs.com/pwndocker/pwndocker-nocbtm:<span class="hljs-number">1</span>.<span class="hljs-number">0</span><br></code></pre></td></tr></table></figure>
+<h3 id="低地址合并"><a href="#低地址合并" class="headerlink" title="低地址合并"></a>低地址合并</h3><p>在gdb中来看就是和头上的chunk合并。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">if</span> (!prev_inuse(p)) &#123;<span class="hljs-comment">//判断p的pre_inuse位，如果是0就进行合并操作</span><br>    prevsize = prev_size (p);<span class="hljs-comment">//得到prev_size</span><br>    size += prevsize;<span class="hljs-comment">//扩大size</span><br>    p = chunk_at_offset(p, -((<span class="hljs-type">long</span>) prevsize));<span class="hljs-comment">//将指针p改为指向前一个chunk</span><br>    unlink(av, p, bck, fwd);<span class="hljs-comment">//此时两个指针指向了上一个chunk，所以得unlink一次让上一个chunk下链，</span><br>  &#125;<br></code></pre></td></tr></table></figure>
 
-<p>1.0版本，有python2</p>
-<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs crmsh">docker <span class="hljs-keyword">tag</span> <span class="hljs-title">registry</span>.cn-hangzhou.aliyuncs.com/pwndocker/pwndocker-nocbtm:<span class="hljs-number">1.0</span> skysider/pwndocker<br></code></pre></td></tr></table></figure>
+<p>所以这道题就利用合并来达到unsortedbin里面混入一个tcache，以此来控制tcache，实现任意地址分配和任意地址写。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs c">add(<span class="hljs-number">0</span>,<span class="hljs-number">0x410</span>,b<span class="hljs-string">&quot;aaaa&quot;</span>)#fake_chunk #<span class="hljs-number">0</span><br>add(<span class="hljs-number">1</span>,<span class="hljs-number">0xe8</span>,b<span class="hljs-string">&quot;bbbb&quot;</span>)#<span class="hljs-number">1</span><br>add(<span class="hljs-number">2</span>,<span class="hljs-number">0x4f0</span>,b<span class="hljs-string">&quot;cccc&quot;</span>)#<span class="hljs-number">2</span><br>add(<span class="hljs-number">3</span>,<span class="hljs-number">0x60</span>,b<span class="hljs-string">&quot;/bin/sh\x00&quot;</span>)#<span class="hljs-number">3</span><br>add(<span class="hljs-number">4</span>,<span class="hljs-number">0x60</span>,b<span class="hljs-string">&quot;/bin/sh\x00&quot;</span>)#<span class="hljs-number">4</span><br><br><br>remove(<span class="hljs-number">0</span>)<br>remove(<span class="hljs-number">1</span>)<br><br>add(<span class="hljs-number">1</span>,<span class="hljs-number">0xe8</span>,b<span class="hljs-string">&quot;a&quot;</span>*<span class="hljs-number">0xe0</span>+p64(<span class="hljs-number">0x510</span>))#<span class="hljs-number">1</span><br><br>remove(<span class="hljs-number">2</span>) # <span class="hljs-number">2</span><br>remove(<span class="hljs-number">1</span>) # <span class="hljs-number">1</span><br></code></pre></td></tr></table></figure>
 
-<p>改名</p>
-<h1 id="运行容器"><a href="#运行容器" class="headerlink" title="运行容器"></a>运行容器</h1><p>先写一个sh脚本，方便我们操作使用</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs shell">docker run -d \<br>	--rm \<br>	-h $&#123;ctf_name&#125; \<br>	--name $&#123;ctf_name&#125; \<br>	-v $(pwd)/$&#123;ctf_name&#125;:/ctf/work \<br>	-p 23946:23946 \<br>	--cap-add=SYS_PTRACE \<br>	skysider/pwndocker<br><br></code></pre></td></tr></table></figure>
-
-<p>我保存为了pwndk.sh</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">./pwndk.sh<br></code></pre></td></tr></table></figure>
-
-<p>返回容器的ID</p>
-<p><img src="/img/wsl-1.png" srcset="/img/loading.gif" lazyload alt="wsl-1"></p>
-<p>成功。</p>
-<h1 id="WSL与Windows文件共享"><a href="#WSL与Windows文件共享" class="headerlink" title="WSL与Windows文件共享"></a>WSL与Windows文件共享</h1><h3 id="网络上共享文件"><a href="#网络上共享文件" class="headerlink" title="网络上共享文件"></a>网络上共享文件</h3><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_43707486/article/details/121651313?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522165338957616781435493157%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&request_id=165338957616781435493157&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduend~default-1-121651313-null-null.142%5Ev10%5Econtrol,157%5Ev12%5Econtrol&utm_term=wsl%E5%A4%8D%E5%88%B6windows%E6%9C%AC%E5%9C%B0%E6%96%87%E4%BB%B6&spm=1018.2226.3001.4187">参考文档</a></p>
-<p>但我的机器上并不能在网络上找到WSL，很奇怪</p>
-<h3 id="cp-x2F-mnt"><a href="#cp-x2F-mnt" class="headerlink" title="cp &#x2F;mnt"></a>cp &#x2F;mnt</h3><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs awk">cp <span class="hljs-regexp">/mnt/</span>c/****   .<br></code></pre></td></tr></table></figure>
-
-<p>注意 这行代码最后的.</p>
-<p>.  代表当前文件将，将目标文件夹下的文件复制到当前文件夹下。</p>
-<h1 id="Pwngdb调试"><a href="#Pwngdb调试" class="headerlink" title="Pwngdb调试"></a>Pwngdb调试</h1><p>有两种方法</p>
-<h3 id="tmux"><a href="#tmux" class="headerlink" title="tmux"></a>tmux</h3><p>在脚本开头加入</p>
-<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ini"><span class="hljs-attr">context.terminal</span> = [<span class="hljs-string">&#x27;tmux&#x27;</span>, <span class="hljs-string">&#x27;sp&#x27;</span>, <span class="hljs-string">&#x27;-h&#x27;</span>]<br></code></pre></td></tr></table></figure>
-
-<p>注：</p>
-<p>得提前在终端启动tmux。</p>
-<p>否则python会提示</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs python">Traceback (most recent call last):<br>File “exp.py”, line <span class="hljs-number">4</span>, <span class="hljs-keyword">in</span><br>gdb.attach§<br>File “/home/ /pwn/pwn/lib/python3<span class="hljs-number">.8</span>/site-packages/pwnlib/context/init.py”, line <span class="hljs-number">1543</span>, <span class="hljs-keyword">in</span> setter<br><span class="hljs-keyword">return</span> function(*a, **kw)<br>File “/home/ /pwn/pwn/lib/python3<span class="hljs-number">.8</span>/site-packages/pwnlib/gdb.py”, line <span class="hljs-number">1051</span>, <span class="hljs-keyword">in</span> attach<br>gdb_pid = misc.run_in_new_terminal(cmd, preexec_fn = preexec_fn)<br>File “/home/ /pwn/pwn/lib/python3<span class="hljs-number">.8</span>/site-packages/pwnlib/util/misc.py”, line <span class="hljs-number">303</span>, <span class="hljs-keyword">in</span> run_in_new_terminal<br>pid = <span class="hljs-built_in">int</span>(out)<br>ValueError: invalid literal <span class="hljs-keyword">for</span> <span class="hljs-built_in">int</span>() <span class="hljs-keyword">with</span> base <span class="hljs-number">10</span>: b’’<br></code></pre></td></tr></table></figure>
-
-<p>最终即可分屏，左半部分exp的互动，右半部分为gdb调试。</p>
-<p><img src="/img/wsl-3.png" srcset="/img/loading.gif" lazyload alt="wsl-3"></p>
-<p>按Q退出gdb。</p>
-<p>再按Ctrl+D退出tmux</p>
-<h3 id="gdb连接"><a href="#gdb连接" class="headerlink" title="gdb连接"></a>gdb连接</h3><p>exp.py脚本中不要写入</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python">gdb.attach(p)<br></code></pre></td></tr></table></figure>
-
-<p>末尾加上</p>
-<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs stylus"><span class="hljs-selector-tag">p</span><span class="hljs-selector-class">.interactive</span>()<br></code></pre></td></tr></table></figure>
-
-<p>运行后得到PID号</p>
-<p><img src="/img/wsl-2.png" srcset="/img/loading.gif" lazyload alt="wsl-2"></p>
-<p>提前开启一个终端，运行相同id的docker。</p>
-<p>在另一个docker中输入</p>
-<figure class="highlight gcode"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs gcode">gdb.attach<span class="hljs-comment">(PID)</span><br></code></pre></td></tr></table></figure>
-
-<p>就可以两个终端进行调试</p>
-<h1 id="python3的错误提示"><a href="#python3的错误提示" class="headerlink" title="python3的错误提示"></a>python3的错误提示</h1><p>经常会提示byte和text之间的问题。</p>
-<p>最好的解决方法就是，在形如‘’的字符串前加入b</p>
-<p>例如</p>
-<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs stylus"><span class="hljs-function"><span class="hljs-title">add</span><span class="hljs-params">(<span class="hljs-number">0</span>,<span class="hljs-number">0</span>x410,b<span class="hljs-string">&#x27;aaaa&#x27;</span>)</span></span><br></code></pre></td></tr></table></figure>
-
-<p>其余的还没遇到，遇到了再说。</p>
-<h1 id="Vim基础操作"><a href="#Vim基础操作" class="headerlink" title="Vim基础操作"></a>Vim基础操作</h1><p>首先就是  命令模式输入I，进入插入模式等等的基础操作。</p>
-<p>只写一些常见的问题</p>
-<p>习惯了Windows下的记事本，保存的时候经常按下 Ctrl + s 保存文本</p>
-<p>这会导致<strong>会阻塞所有的输入，解决方式为CTRL+q</strong></p>
-<p>其次就是文本内复制</p>
-<p>按下ESC进入命令模式，按下<strong>yy</strong></p>
-<p>然后移动光标到想要复制到的地方，按下<strong>q</strong></p>
-<p>就可以复制</p>
-<p>多行复制的话，可以y+n(小键盘上的数字)</p>
-<p>这种多行操作在vim很常见</p>
-<h1 id="WSL尚未解决的问题"><a href="#WSL尚未解决的问题" class="headerlink" title="WSL尚未解决的问题"></a>WSL尚未解决的问题</h1><p>本人WSL配置的很奇怪。网上也没有查到相似的案例。</p>
-<p>开机如果不是第一时间启动WSL。</p>
-<p>过一段时间启动就会提示</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">wsl某项操作曾尝试在降级对象上进行。<br></code></pre></td></tr></table></figure>
-
-<p>然后退出。</p>
-<p>解决方法目前尚未找到。</p>
-<p>网上的NoLsp方法尝试了也无法使用</p>
-<p>唯一有用的就是</p>
-<figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ebnf"><span class="hljs-attribute">netsh winsock reset</span><br></code></pre></td></tr></table></figure>
-
-<p>然后重启电脑</p>
+<p>这样，chunk1，chunk2，chunk0全合并了</p>
+<p><img src="/%5Cimg%5Ciscc_unlink-3.png" srcset="/img/loading.gif" lazyload alt="iscc_unlink-3"></p>
+<p>接下来我们把free_got的地址写入就行，因为没开PIE（程序加载地址不变）和ASLR（堆栈地址随机化），所以地址并不变。</p>
+<h2 id="延迟绑定具体过程"><a href="#延迟绑定具体过程" class="headerlink" title="延迟绑定具体过程"></a>延迟绑定具体过程</h2><p>第一步，由函数调用跳入到 PLT 表中第二步，PLT 表跳到 GOT 表中<br>第三步，GOT 表回跳到 PLT 表中，这时候进行压栈，把代表函数的 ID 压栈<br>第四步，跳转到公共的 PLT 表项中<br>第五步，进入到 GOT 表<br>第六步，_dl_runtime_resolve 对动态函数进行地址解析和重定位<br>第七步，把动态函数真实的地址写入到 GOT 表项中<br>第八步，执行函数<br>第九步，返回</p>
+<p><img src="/%5Cimg%5Ciscc_unlink-4.png" srcset="/img/loading.gif" lazyload alt="iscc_unlink-4"></p>
+<p>我们的free等函数已经被调用过一次，所以其对应的got表里就是真实函数地址。</p>
+<p>但system我们并没有调用过，所以其plt和got都不是真正的函数地址。</p>
+<p>所以要想正确的调用system，还是要从plt开始第一次调用</p>
+<p>这样我们可以修改free来system，但要注意，我们free改完之后会使得下一个got表的末尾写入\x00，这就导致strncmp无法正常使用，所以我们可以选择改strncmp为system，但要改strncpy话就会牵连到后面的system，所以我们需要对system补全。</p>
 
               
             </div>
@@ -361,40 +302,10 @@
   
     <span>></span>
     
-  <a href="/categories/Pwn/base/" class="category-chain-item">base</a>
+  <a href="/categories/Pwn/heap/" class="category-chain-item">heap</a>
   
   
 
-  
-
-      </span>
-    
-  
-    
-      <span class="category-chain">
-        
-  <a href="/categories/Linux/" class="category-chain-item">Linux</a>
-  
-  
-
-      </span>
-    
-  
-    
-      <span class="category-chain">
-        
-  <a href="/categories/Docker/" class="category-chain-item">Docker</a>
-  
-  
-
-      </span>
-    
-  
-    
-      <span class="category-chain">
-        
-  <a href="/categories/WSL/" class="category-chain-item">WSL</a>
-  
   
 
       </span>
@@ -420,8 +331,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>首次实战WSL+Docker</div>
-      <div>https://hushs1gnal.github.io/2022/05/24/wsltest/</div>
+      <div>ISCC2022-Unlink</div>
+      <div>https://hushs1gnal.github.io/2022/05/30/ISCC-Unlink/</div>
     </div>
     <div class="license-meta">
       
@@ -433,7 +344,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2022年5月24日</div>
+          <div>2022年5月30日</div>
         </div>
       
       
@@ -463,18 +374,12 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2022/05/30/ISCC-Unlink/" title="ISCC2022-Unlink">
-                        <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">ISCC2022-Unlink</span>
-                        <span class="visible-mobile">上一篇</span>
-                      </a>
-                    
                   </article>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2022/05/19/kernelROP-2018%E5%BC%BA%E7%BD%91%E6%9D%AF-core/" title="kernel_ROP-2018_强网杯-core">
-                        <span class="hidden-mobile">kernel_ROP-2018_强网杯-core</span>
+                      <a href="/2022/05/24/wsltest/" title="首次实战WSL+Docker">
+                        <span class="hidden-mobile">首次实战WSL+Docker</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>

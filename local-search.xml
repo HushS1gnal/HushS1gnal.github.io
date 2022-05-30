@@ -4,6 +4,33 @@
   
   
   <entry>
+    <title>ISCC2022-Unlink</title>
+    <link href="/2022/05/30/ISCC-Unlink/"/>
+    <url>/2022/05/30/ISCC-Unlink/</url>
+    
+    <content type="html"><![CDATA[<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p><img src="/%5Cimg%5Ciscc_unlink-1.png" alt="iscc_unlink-1"></p><p>很普通的菜单题目。</p><p>但给了个sh后门函数</p><p><img src="/%5Cimg%5Ciscc_unlink-2.png" alt="iscc_unlink-2"></p><p>查出是libc-2.23(然而并不是，只是由Ubuntu16编译而已)</p><p>实际上是libc-2.27，后续关于如何判断libc版本我会再记个笔记。</p><p>仔细看程序，虽然没有UAF漏洞，但有堆溢出漏洞，可以修改了</p><h2 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h2><p>让一个大块(unsorted bin)和一个小块（tcache，且已被释放）合并（修改tcache下一块的chunk头部的prevsize）</p><h2 id="合并"><a href="#合并" class="headerlink" title="合并"></a>合并</h2><p>合并分为两种</p><p>1.向高地址的chunk合并</p><p>2.向低地址的chunk合并</p><h3 id="高地址合并"><a href="#高地址合并" class="headerlink" title="高地址合并"></a>高地址合并</h3><p>在gdb中，所谓高地址，就是在下面的chunk，因为我们知道堆的生长方向是向上，也就是内存地址增加的方向，栈则相反。</p><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs c"> <span class="hljs-keyword">if</span> (nextchunk != av-&gt;top) &#123;<span class="hljs-comment">//nextchunk根据目前堆块的size来计算的，如果下一个堆块不是topchunk</span><br>      nextinuse = inuse_bit_at_offset(nextchunk, nextsize);<span class="hljs-comment">//检查一下nextchunk的nextchunk的inuse位，其实就是判断nextchunk是否被释放了</span><br>      <span class="hljs-keyword">if</span> (!nextinuse) &#123;<span class="hljs-comment">//如果是0，也就是nextchunk也被释放了，那就进行合并</span><br>        unlink(av, nextchunk, bck, fwd);<span class="hljs-comment">//unlink将nextchunk下链</span><br>        size += nextsize;<span class="hljs-comment">//合并完成</span><br>      &#125;<br>.......<br><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> inuse_bit_at_offset(p, s)\</span><br><span class="hljs-meta">  (((mchunkptr) (((char *) (p)) + (s)))-&gt;mchunk_size &amp; PREV_INUSE)</span><br></code></pre></td></tr></table></figure><h3 id="低地址合并"><a href="#低地址合并" class="headerlink" title="低地址合并"></a>低地址合并</h3><p>在gdb中来看就是和头上的chunk合并。</p><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">if</span> (!prev_inuse(p)) &#123;<span class="hljs-comment">//判断p的pre_inuse位，如果是0就进行合并操作</span><br>    prevsize = prev_size (p);<span class="hljs-comment">//得到prev_size</span><br>    size += prevsize;<span class="hljs-comment">//扩大size</span><br>    p = chunk_at_offset(p, -((<span class="hljs-type">long</span>) prevsize));<span class="hljs-comment">//将指针p改为指向前一个chunk</span><br>    unlink(av, p, bck, fwd);<span class="hljs-comment">//此时两个指针指向了上一个chunk，所以得unlink一次让上一个chunk下链，</span><br>  &#125;<br></code></pre></td></tr></table></figure><p>所以这道题就利用合并来达到unsortedbin里面混入一个tcache，以此来控制tcache，实现任意地址分配和任意地址写。</p><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs c">add(<span class="hljs-number">0</span>,<span class="hljs-number">0x410</span>,b<span class="hljs-string">&quot;aaaa&quot;</span>)#fake_chunk #<span class="hljs-number">0</span><br>add(<span class="hljs-number">1</span>,<span class="hljs-number">0xe8</span>,b<span class="hljs-string">&quot;bbbb&quot;</span>)#<span class="hljs-number">1</span><br>add(<span class="hljs-number">2</span>,<span class="hljs-number">0x4f0</span>,b<span class="hljs-string">&quot;cccc&quot;</span>)#<span class="hljs-number">2</span><br>add(<span class="hljs-number">3</span>,<span class="hljs-number">0x60</span>,b<span class="hljs-string">&quot;/bin/sh\x00&quot;</span>)#<span class="hljs-number">3</span><br>add(<span class="hljs-number">4</span>,<span class="hljs-number">0x60</span>,b<span class="hljs-string">&quot;/bin/sh\x00&quot;</span>)#<span class="hljs-number">4</span><br><br><br>remove(<span class="hljs-number">0</span>)<br>remove(<span class="hljs-number">1</span>)<br><br>add(<span class="hljs-number">1</span>,<span class="hljs-number">0xe8</span>,b<span class="hljs-string">&quot;a&quot;</span>*<span class="hljs-number">0xe0</span>+p64(<span class="hljs-number">0x510</span>))#<span class="hljs-number">1</span><br><br>remove(<span class="hljs-number">2</span>) # <span class="hljs-number">2</span><br>remove(<span class="hljs-number">1</span>) # <span class="hljs-number">1</span><br></code></pre></td></tr></table></figure><p>这样，chunk1，chunk2，chunk0全合并了</p><p><img src="/%5Cimg%5Ciscc_unlink-3.png" alt="iscc_unlink-3"></p><p>接下来我们把free_got的地址写入就行，因为没开PIE（程序加载地址不变）和ASLR（堆栈地址随机化），所以地址并不变。</p><h2 id="延迟绑定具体过程"><a href="#延迟绑定具体过程" class="headerlink" title="延迟绑定具体过程"></a>延迟绑定具体过程</h2><p>第一步，由函数调用跳入到 PLT 表中第二步，PLT 表跳到 GOT 表中<br>第三步，GOT 表回跳到 PLT 表中，这时候进行压栈，把代表函数的 ID 压栈<br>第四步，跳转到公共的 PLT 表项中<br>第五步，进入到 GOT 表<br>第六步，_dl_runtime_resolve 对动态函数进行地址解析和重定位<br>第七步，把动态函数真实的地址写入到 GOT 表项中<br>第八步，执行函数<br>第九步，返回</p><p><img src="/%5Cimg%5Ciscc_unlink-4.png" alt="iscc_unlink-4"></p><p>我们的free等函数已经被调用过一次，所以其对应的got表里就是真实函数地址。</p><p>但system我们并没有调用过，所以其plt和got都不是真正的函数地址。</p><p>所以要想正确的调用system，还是要从plt开始第一次调用</p><p>这样我们可以修改free来system，但要注意，我们free改完之后会使得下一个got表的末尾写入\x00，这就导致strncmp无法正常使用，所以我们可以选择改strncmp为system，但要改strncpy话就会牵连到后面的system，所以我们需要对system补全。</p>]]></content>
+    
+    
+    <categories>
+      
+      <category>Pwn</category>
+      
+      <category>heap</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>Pwn</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>首次实战WSL+Docker</title>
     <link href="/2022/05/24/wsltest/"/>
     <url>/2022/05/24/wsltest/</url>
